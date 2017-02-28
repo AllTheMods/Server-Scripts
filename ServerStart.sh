@@ -107,7 +107,7 @@ install_server(){
 		rm -rf installer.jar  >>serverstart.log 2>&1
 		echo "Renaming forge JAR to ${FORGE_JAR}"
 		echo "DEBUG: Renaming forge-${MCVER}-${FORGEVER}-universal.jar to ${FORGE_JAR}" >>serverstart.log 2>&1
-		mv "forge-*-*-universal.jar" ${FORGE_JAR} >>serverstart.log 2>&1
+		mv forge-*-*-universal.jar ${FORGE_JAR} >>serverstart.log 2>&1
 	fi
 }
 
@@ -207,6 +207,22 @@ read_config(){
 
 }
 
+eula(){
+	if [ ! -f eula.txt ]; then
+		echo "Could not find eula.txt starting server to generate it"
+		start_server
+		echo ""
+		echo "Closing to give user a change to accept the eula"
+		exit 0
+	else
+		if grep -Fxq "eula=false" eula.txt; then
+			echo "Could not find 'eula=true' in 'eula.txt'"
+			echo "Closing to give user a change to accept the eula"
+			exit 0
+		fi
+	fi
+}
+
 read_config
 
 # Script/batch starts here...
@@ -241,6 +257,7 @@ fi
 check_dir
 check_connection
 check_binaries
+eula
 
 # loop to restart server and check crash frequency
 a=0
@@ -278,6 +295,7 @@ while true ; do
 	check_dir
 	check_connection
 	check_binaries
+	eula
 	echo "INFO: Server-auto-restart commencing"  >>serverstart.log 2>&1
 	echo "Rebooting now!"
 done
