@@ -26,32 +26,10 @@
 #### or come find us on Discord: https://discord.gg/FdFDVWb
 ####
 
+
 #For Server Owners
 
-	# RAM to allocate to server
-	export MAX_RAM="5G"
-
-	# Filename for forge jar (needed by some hosts)
-	export FORGE_JAR="forge.jar"
-
-	# Server's JVM start args
-	export JAVA_ARGS="-XX:+ExplicitGCInvokesConcurrent -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=250 -XX:UseSSE=3"
-
-	# Max server crashes (1hr apart or less) to stop auto-restart (10 default)
-	export CRASH_COUNT=10
-
-	# Allow script to run in TMP or directories with no R/W access (0 default)
-	export RUN_FROM_BAD_FOLDER=0
-
-	# Skip internet connectivity [ping] check (default 0)
-	export IGNORE_OFFLINE=0
-
-# For Modpack Developers
-# (Do not modify unless you know what you're doing)
-
-	export MCVER="1.10.2"
-	export FORGEVER="12.18.3.2221"
-	export FORGEURL="DISABLE"
+	
 #
 #
 #
@@ -90,7 +68,7 @@ install_server(){
 		else
 			export URL="${FORGEURL}"
 		fi
-
+		echo $URL
 		which wget >> /dev/null
 		if [ $? -eq 0 ]; then
 			echo "DEBUG: (wget) Downloading ${URL}" >>serverstart.log 2>&1
@@ -129,7 +107,7 @@ install_server(){
 		rm -rf installer.jar  >>serverstart.log 2>&1
 		echo "Renaming forge JAR to ${FORGE_JAR}"
 		echo "DEBUG: Renaming forge-${MCVER}-${FORGEVER}-universal.jar to ${FORGE_JAR}" >>serverstart.log 2>&1
-		mv "forge-${MCVER}-${FORGEVER}-universal.jar" ${FORGE_JAR} >>serverstart.log 2>&1
+		mv "forge-*-*-universal.jar" ${FORGE_JAR} >>serverstart.log 2>&1
 	fi
 }
 
@@ -216,12 +194,27 @@ check_binaries(){
 	fi
 }
 
+read_config(){
+	while read -r line || [[ -n "$line" ]] ; do
+   		if echo $line | grep -F = &>/dev/null; then
+   			if [[ ${str:0:1} != "#" ]] ; then
+      			name=$(echo "$line" | cut -d '=' -f 1)
+      			val=$(echo "${line}" | cut -d '=' -f 2-)
+      			eval "export ${name}='${val}'"
+      		fi
+   		fi
+	done < settings.cfg 
+
+}
+
+read_config
+
 # Script/batch starts here...
 
 # init log file and dump basic info
 echo "INFO: Starting script at" $(date -u +%Y-%m-%d_%H:%M:%S) >serverstart.log 2>&1
 echo "DEBUG: Dumping starting variables: " >>serverstart.log 2>&1
-echo "DEBUG: MAX_RAM=${MAX_RAM}" >>serverstart.log 2>&1
+echo "DEBUG: MAX_RAM=$MAX_RAM" >>serverstart.log 2>&1
 echo "DEBUG: FORGE_JAR=$FORGE_JAR" >>serverstart.log 2>&1
 echo "DEBUG: JAVA_ARGS=$JAVA_ARGS" >>serverstart.log 2>&1
 echo "DEBUG: CRASH_COUNT=$CRASH_COUNT" >>serverstart.log 2>&1
@@ -276,7 +269,7 @@ while true ; do
 	export answer="y"
 	echo "Server will restart in ~10 seconds. No input needed..."
 	read -t 12 -p "Restart now (y) or exit to shell (n)?  " answer
-	if [[ "$answer" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+	if [[ "$answer" =~ ^([nN][oO]|[nN])+$ ]]; then
 		echo "INFO: User cancelled restart; exiting to shell" >>serverstart.log 2>&1
 		exit 0
 	fi
