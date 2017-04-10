@@ -2,7 +2,6 @@
 SETLOCAL
 ::::
 :::: Minecraft-Forge Server install/launcher script
-:::: Version 0.1
 :::: Created by: "Ordinator" 
 ::::
 :::: Originally created for use in "All The Mods" modpacks
@@ -12,64 +11,20 @@ SETLOCAL
 :::: 
 :::: This script will fetch the appropriate forge installer
 :::: and run it to instal forge AND fetch Minecraft (from Mojang)
-:::: If Forge and Minecraft are already installed it will skip
-:::: download/install and launch server directly (with 
-:::: auto-restart-after-crash logic as well)
+:::: then it will start the forge server with 
+:::: auto-restart-after-crash logic
 ::::
 :::: IF THERE ARE ANY ISSUES
 :::: Please make a report on the AllTheMods github:
-:::: https://github.com/whatthedrunk/allthemods/issues
+:::: https://github.com/AllTheMods/Server-Scripts
 :::: With the contents of [serverstart.log] and [installer.log]
 ::::
 :::: or come find us on Discord: https://discord.gg/FdFDVWb
 ::::
-:::: Special thanks to all the code I Frankensteined from google
+:::: Special thanks to all the code Frankensteined from google
 :::: There are many sources and references I should have kept
 :::: record of but was not diligent. Apologies and thanks all around
-
-
-::::::::::::::::::::::::::::::::::::
-:::: SETTINGS FOR SERVER OWNERS ::::
-::::::::::::::::::::::::::::::::::::
-
-::Ram to allocate to modpack
-SET MC_SERVER_MAX_RAM=5G
-
-::What to rename forge.jar filename to (possibly needed by some server hosts)
-SET MC_SERVER_FORGE_JAR=forge.jar
-
-::Java args to use when launching Modpack
-SET MC_SERVER_JVM_ARGS=-server -d64 -Xmx%MC_SERVER_MAX_RAM% -XX:+ExplicitGCInvokesConcurrent -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=80 -XX:TargetSurvivorRatio=90 -XX:+UseCompressedOops -XX:+OptimizeStringConcat -XX:+AggressiveOpts -XX:+UseCodeCacheFlushing -XX:UseSSE=3
-
-::Number of times the server should crash in a row before it stops auto-restarting.
-SET MC_SERVER_MAX_CRASH=10
-
-::Num of seconds since last crash/restart to count towards max-crash total
-::If more than this many seconds has passed since last crash, counter will reset.
-SET MC_SERVER_CRASH_TIMER=600
-
-::By default this script will stop if running from SYSTEM, PROGRAM FILES or TEMP folders
-::If you want to allow this anyway (not recommended) set this value to 1 (default 0)
-SET MC_SERVER_RUN_FROM_BAD_FOLDER=0
-
-::This script will check for basic internet connectivity 
-::If you want to be able to start server while offline, set this to 1 (default 0)
-SET MC_SERVER_IGNORE_OFFLINE=0
-
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::               MODPACK SETTINGS                   ::::
-:::: (defined by pack dev, not intended to be edited) ::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET MC_SERVER_MCVER=1.11.2
-SET MC_SERVER_FORGEVER=13.20.0.2226
-
-:: Manual link to forge installer to bypass url lookup
-:: Mostly just available for troubleshooting/debug purposes
-:: set to DISABLE for auto link parse (default: DISABLE)
-SET MC_SERVER_FORGEURL=DISABLE
-
+::
 :: It's also possible for modpack devs to distribute the forge installer
 :: of the intended forge version by distributing it alongside this script 
 :: named "forge-installer.jar" -- If included, downloading  of forge
@@ -89,6 +44,7 @@ SET MC_SERVER_FORGEURL=DISABLE
 :::: Don't modify unless you pwn dragons ::::
 :::::::::::::::::::::::::::::::::::::::::::::
 
+
 REM Internal Scripty stuff
 REM default an error code in case error block is ran without this var being defined first
 SET MC_SERVER_ERROR_REASON=Unspecified
@@ -100,8 +56,6 @@ REM set "crash time" to initial script start
 SET MC_SERVER_CRASH_YYYYMMDD=%date:~10,4%%date:~4,2%%date:~7,2%
 SET MC_SERVER_CRASH_HHMMSS=%time:~0,2%%time:~3,2%%time:~6,2%
 
-
-:BEGIN
 REM delete log if already exists to start a fresh one
 IF EXIST serverstart.log DEL /F /Q serverstart.log
 ECHO. 1>> serverstart.log 2>&1
@@ -110,6 +64,44 @@ ECHO. 1>> serverstart.log 2>&1
 ECHO ----------------------------------------------------------------- 1>> serverstart.log 2>&1
 ECHO INFO: Starting batch at %MC_SERVER_CRASH_YYYYMMDD%:%MC_SERVER_CRASH_HHMMSS% 1>> serverstart.log 2>&1
 ECHO ----------------------------------------------------------------- 1>> serverstart.log 2>&1
+
+
+:BEGIN
+REM Check for config file
+ECHO INFO: Checking that settings.cfg exists 1>> serverstart.log 2>&1
+IF NOT EXIST "%CD%\settings.cfg" (
+	SET MC_SERVER_ERROR_REASON="settings.cfg" not found.
+	GOTO ERROR
+)
+
+REM  LOAD Settings from config
+ECHO INFO: Loading variables from settings.cfg 1>> serverstart.log 2>&1
+for /f "delims== tokens=1,2" %%G in (settings.cfg) do set %%G=%%H
+
+REM Re-map imported vars
+SET MC_SERVER_MAX_RAM=%MAX_RAM%
+SET MC_SERVER_FORGE_JAR=%FORGE_JAR%
+SET MC_SERVER_JVM_ARGS=-Xmx%MC_SERVER_MAX_RAM% %JAVA_ARGS%
+SET MC_SERVER_MAX_CRASH=%CRASH_COUNT%
+SET MC_SERVER_CRASH_TIMER=%CRASH_TIMER%
+SET MC_SERVER_RUN_FROM_BAD_FOLDER=%RUN_FROM_BAD_FOLDER%
+SET MC_SERVER_IGNORE_OFFLINE=%IGNORE_OFFLINE%
+SET MC_SERVER_MCVER=%MCVER%
+SET MC_SERVER_FORGEVER=%FORGEVER%
+SET MC_SERVER_FORGEURL=%FORGEURL%
+
+REM Cleanup imported vars after being remapped
+SET MAX_RAM=
+SET FORGE_JAR=
+SET JAVA_ARGS=
+SET CRASH_COUNT=
+SET CRASH_TIMER=
+SET RUN_FROM_BAD_FOLDER=
+SET IGNORE_OFFLINE=
+SET MCVER=
+SET FORGEVER=
+SET FORGEURL=
+
 
 ECHO DEBUG: Starting variable definitions: 1>> serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>> serverstart.log 2>&1
@@ -266,8 +258,23 @@ REM Batch will wait here indefinetly while MC server is running
 java %MC_SERVER_JVM_ARGS% -jar %MC_SERVER_FORGE_JAR% nogui
 
 REM If server is exited or crashes, restart...
+CLS
+ECHO.
 ECHO WARN: Server was stopped (possibly crashed)...
-GOTO RESTARTER
+
+
+:CHECKEULA
+>nul FIND /I "eula=true" eula.txt && (
+	ECHO.
+	GOTO RESTARTER
+) || (
+	ECHO.
+	ECHO Could not find "eula=true" in eula.txt file
+	ECHO Please edit and save the EULA file before continuing.
+	ECHO.
+	PAUSE
+	GOTO CHECKEULA
+)
 
 
 :INSTALLSTART
@@ -371,7 +378,7 @@ ECHO INFO: Download/Install complete... 1>> serverstart.log 2>&1
 ECHO.
 TIMEOUT 5
 
-GOTO STARTSERVER
+GOTO BEGIN
 
 
 :ERROR
@@ -402,7 +409,7 @@ IF %MC_SERVER_TMP_FLAG% GTR 0 (
 	SET MC_SERVER_CRASH_YYYYMMDD=%date:~10,4%%date:~4,2%%date:~7,2%
 	SET MC_SERVER_CRASH_HHMMSS=%time:~0,2%%time:~3,2%%time:~6,2%
 	SET MC_SERVER_CRASH_COUNTER=0
-	GOTO STARTSERVER
+	GOTO BEGIN
 )
 
 REM Arithmetic to check SECONDS since last crash
@@ -417,7 +424,7 @@ IF %MC_SERVER_TMP_FLAG% GTR %MC_SERVER_CRASH_TIMER% (
 	SET MC_SERVER_CRASH_YYYYMMDD=%date:~10,4%%date:~4,2%%date:~7,2%
 	SET MC_SERVER_CRASH_HHMMSS=%time:~0,2%%time:~3,2%%time:~6,2%
 	SET MC_SERVER_CRASH_COUNTER=0
-	GOTO STARTSERVER
+	REM GOTO BEGIN
 )
 
 REM If we are still here, time difference is within threshold to increment counter
@@ -449,7 +456,7 @@ IF %ERRORLEVEL% GEQ 2 (
 	ECHO INFO: Server manually stopped before auto-restart 1>> serverstart.log 2>&1
 	GOTO CLEANUP
 ) ELSE ( 
-	GOTO STARTSERVER
+	GOTO BEGIN
 )
 
 
