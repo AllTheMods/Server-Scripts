@@ -1,48 +1,23 @@
-@ECHO OFF
+@ECHO ON
 SETLOCAL
 ::::
 :::: Minecraft-Forge Server install/launcher script
-:::: Created by: "Ordinator" 
+:::: Created by the "All The Mods" pack team
 ::::
-:::: Originally created for use in "All The Mods" modpacks
+:::: This script will setup and start the minecraft server
 ::::
-:::: Latest version:
-:::: https://github.com/whatthedrunk/allthemods/blob/master/server-scripts/serverstart.bat
-:::: 
-:::: This script will fetch the appropriate forge installer
-:::: and run it to instal forge AND fetch Minecraft (from Mojang)
-:::: then it will start the forge server with 
-:::: auto-restart-after-crash logic
+:::: THIS FILE NOT INTENDED TO BE EDITED, USE "settings.cfg" INSTEAD
 ::::
-:::: IF THERE ARE ANY ISSUES
-:::: Please make a report on the AllTheMods github:
-:::: https://github.com/AllTheMods/Server-Scripts
-:::: With the contents of [serverstart.log] and [installer.log]
+:::: FOR HELP (or more details);
+::::    Github:   https://github.com/AllTheMods/Server-Scripts
+::::    Discord:  https://discord.gg/FdFDVWb
 ::::
-:::: or come find us on Discord: https://discord.gg/FdFDVWb
-::::
-:::: Special thanks to all the code Frankensteined from google
-:::: There are many sources and references I should have kept
-:::: record of but was not diligent. Apologies and thanks all around
-::
-:: It's also possible for modpack devs to distribute the forge installer
-:: of the intended forge version by distributing it alongside this script 
-:: named "forge-installer.jar" -- If included, downloading  of forge
-:: files will be bypassed
 
 
-
-
-
-
-
-
-
-
-:::::::::::::::::::::::::::::::::::::::::::::
-:::: There be dragons from here on       ::::
-:::: Don't modify unless you pwn dragons ::::
-:::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::
+:::: There be dragons from here onward !!!  ::::
+:::: Don't modify unless you pwn dragons... ::::
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 REM Internal Scripty stuff
@@ -65,22 +40,71 @@ ECHO ----------------------------------------------------------------- 1>> serve
 ECHO INFO: Starting batch at %MC_SERVER_CRASH_YYYYMMDD%:%MC_SERVER_CRASH_HHMMSS% 1>> serverstart.log 2>&1
 ECHO ----------------------------------------------------------------- 1>> serverstart.log 2>&1
 
-
 :BEGIN
 REM Check for config file
 ECHO INFO: Checking that settings.cfg exists 1>> serverstart.log 2>&1
 IF NOT EXIST "%CD%\settings.cfg" (
-	SET MC_SERVER_ERROR_REASON="settings.cfg" not found.
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Not_Found
 	GOTO ERROR
 )
 
+ECHO DEBUG: settings.cfg Found. Logging full contents below: 1>> serverstart.log 2>&1
+REM >>serverstart.log TYPE settings.cfg
+>nul COPY serverstart.log+settings.cfg serverstart.log
+ECHO. 1>> serverstart.log 2>&1
+
+>nul FIND /I "MAX_RAM=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)
+
+>nul FIND /I "JAVA_ARGS=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)
+
+>nul FIND /I "CRASH_COUNT=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)
+
+>nul FIND /I "CRASH_TIMER=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)
+	
+>nul FIND /I "RUN_FROM_BAD_FOLDER=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)
+	
+>nul FIND /I "IGNORE_OFFLINE=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)	
+
+>nul FIND /I "MCVER=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)	
+
+>nul FIND /I "FORGEVER=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)	
+
+>nul FIND /I "FORGEURL=" settings.cfg || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error
+	GOTO ERROR
+	)		
+	
 REM  LOAD Settings from config
 ECHO INFO: Loading variables from settings.cfg 1>> serverstart.log 2>&1
-for /f "delims== tokens=1,2" %%G in (settings.cfg) do set %%G=%%H
+for /f "delims==; tokens=1,2" %%G in (settings.cfg) do set %%G=%%H
 
 REM Re-map imported vars
 SET MC_SERVER_MAX_RAM=%MAX_RAM%
-SET MC_SERVER_FORGE_JAR=%FORGE_JAR%
+REM SET MC_SERVER_FORGE_JAR=%FORGE_JAR%
 SET MC_SERVER_JVM_ARGS=-Xmx%MC_SERVER_MAX_RAM% %JAVA_ARGS%
 SET MC_SERVER_MAX_CRASH=%CRASH_COUNT%
 SET MC_SERVER_CRASH_TIMER=%CRASH_TIMER%
@@ -102,7 +126,6 @@ SET MCVER=
 SET FORGEVER=
 SET FORGEURL=
 
-
 ECHO DEBUG: Starting variable definitions: 1>> serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>> serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGE_JAR=%MC_SERVER_FORGE_JAR% 1>> serverstart.log 2>&1
@@ -120,6 +143,28 @@ ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>> serverstart.lo
 ECHO DEBUG: MC_SERVER_CRASH_YYYYMMDD=%MC_SERVER_CRASH_YYYYMMDD% 1>> serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_HHMMSS=%MC_SERVER_CRASH_HHMMSS% 1>> serverstart.log 2>&1
 
+:CHECKJAVA
+ECHO INFO: Checking java installation...
+ECHO INFO: Checking java installation: 1>> serverstart.log 2>&1
+
+java -d64 -version 2>&1 | FIND "1.8" 1>> serverstart.log 2>&1
+IF %ERRORLEVEL% EQU 0 (
+	ECHO INFO: Found 64-bit Java 1.8 1>> serverstart.log 2>&1
+) ELSE (
+    java -d64 -version 2>&1 | FIND "1.9" 1>> serverstart.log 2>&1
+	IF %ERRORLEVEL% EQU 0 (
+		ECHO INFO: Found 64-bit Java 1.9 1>> serverstart.log 2>&1
+	) ELSE (
+		ECHO ERROR: Could not find 64-bit Java 1.8 or 1.9 installed or in PATH 1>> serverstart.log 2>&1
+		CLS
+		ECHO.
+		ECHO ERROR: Could not find valid java version installed. 
+		ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
+		ECHO https://java.com/en/download/manual.jsp
+		ECHO.
+		SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
+		GOTO ERROR
+	)
 
 :CHECKFOLDER
 IF NOT %MC_SERVER_RUN_FROM_BAD_FOLDER% EQU 0 (
@@ -221,15 +266,14 @@ IF MC_SERVER_TMP_FLAG EQU 1 (
 	GOTO ERROR
 	)
 
-	
 :CHECKFILES
 ECHO Checking for forge/minecraft binaries...
 ECHO INFO: Checking for forge/minecraft binaries... 1>> serverstart.log 2>&1
 
 REM Check if forge is already installed
-IF NOT EXIST "%CD%\%MC_SERVER_FORGE_JAR%" (
-	ECHO FORGE not found, re-installing...
-	ECHO INFO: FORGE not found, re-installing... 1>> serverstart.log 2>&1
+IF NOT EXIST "%CD%\*forge*%MC_SERVER_FORGEVER%*universal*.jar" (
+	ECHO FORGE %MC_SERVER_FORGEVER% binary not found, re-installing...
+	ECHO INFO: FORGE %MC_SERVER_FORGEVER% not found, re-installing... 1>> serverstart.log 2>&1
 	GOTO INSTALLSTART
 )
 
@@ -242,11 +286,12 @@ IF NOT EXIST "%CD%\minecraft_server.%MC_SERVER_MCVER%.jar" (
 
 REM Check if Libraries are already downloaded
 IF NOT EXIST "%CD%\libraries" (
-	ECHO Libraries not found, re-installing Forge...
-	ECHO INFO: Libraries not found, re-installing Forge... 1>> serverstart.log 2>&1
+	ECHO Libraries folder not found, re-installing Forge...
+	ECHO INFO: Libraries folder not found, re-installing Forge... 1>> serverstart.log 2>&1
 	GOTO INSTALLSTART
 )
 
+FOR /f %%x in ('dir *forge*%MC_SERVER_FORGEVER%*universal*.jar /B /O:-D') DO SET MC_SERVER_FORGE_JAR=%%x & GOTO STARTSERVER
 
 :STARTSERVER
 ECHO.
@@ -258,10 +303,9 @@ REM Batch will wait here indefinetly while MC server is running
 java %MC_SERVER_JVM_ARGS% -jar %MC_SERVER_FORGE_JAR% nogui
 
 REM If server is exited or crashes, restart...
-CLS
+REM CLS
 ECHO.
 ECHO WARN: Server was stopped (possibly crashed)...
-
 
 :CHECKEULA
 >nul FIND /I "eula=true" eula.txt && (
@@ -274,39 +318,51 @@ ECHO WARN: Server was stopped (possibly crashed)...
 	ECHO.
 	PAUSE
 	GOTO CHECKEULA
-)
-
+	)
 
 :INSTALLSTART
 ECHO Clearing old files and installing forge/minecraft...
 ECHO INFO: Clearing and installing forge/minecraft... 1>> serverstart.log 2>&1
 
 REM Just in case there's anything pending or dupe-named before starting...
-bitsadmin /reset
+bitsadmin /reset 1>> serverstart.log 2>&1
 
 REM Check for existing/included forge-installer and run it instead of downloading
-IF EXIST forge-installer.jar (
-	ECHO Existing forge-installer.jar already found...
+IF EXIST forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar (
+	ECHO.
+	ECHO.
+	ECHO Existing forge installer already found...
 	ECHO Default is to use this installer and not re-download
-	
-	REM Short 5-second choice if user wants to download anyway
-	CHOICE /M:"Use Existing Installer JAR (Y) or Download new from forge (N)" /T:5 /D:Y
-	IF %ERRORLEVEL% EQU 0 (
-		GOTO RUNINSTALLER
-	) ELSE (
-		DEL /F /Q forge-installer.jar 1>> serverstart.log 2>&1
-	)
+	GOTO RUNINSTALLER
 )
 
+REM Ping minecraftforge before attempting download
+PING -n 2 -w 1000 minecraftforge.net | find "bytes="  1>> serverstart.log 2>&1
+IF %ERRORLEVEL% EQU 0 (
+	ECHO INFO: Ping of "minecraftforge.net" Successfull 1>> serverstart.log 2>&1
+) ELSE (
+	ECHO ERROR: Could not reach minecraftforge.net! Possible firewall or internet issue?
+	ECHO ERROR: Could not reach minecraftforge.net 1>> serverstart.log 2>&1
+	SET MC_SERVER_ERROR_REASON=NoInternetConnectivityMinecraftForgeNet
+	GOTO ERROR
+
 DEL /F /Q "%CD%\forge-index.html" 1>> serverstart.log 2>&1
-DEL /F /Q "%CD%\%MC_SERVER_FORGE_JAR%" 1>> serverstart.log 2>&1
-DEL /F /Q "%CD%\forge-installer-temp.jar"  1>> serverstart.log 2>&1
+DEL /F /Q "%CD%\*forge*%MC_SERVER_FORGEVER%*universal*" 1>> serverstart.log 2>&1
+DEL /F /Q "%CD%\tmp-forgeinstaller.jar"  1>> serverstart.log 2>&1
 RMDIR /S /Q "%CD%\libraries"  1>> serverstart.log 2>&1
 
+ECHO.
+ECHO.
+ECHO Downloading FORGE (step 1 of 2). This can take several minutes, please be patient...
+
 REM Check if direct forge URL is specified in config
-IF NOT %MC_SERVER_FORGEURL%==DISABLE GOTO DOWNLOADINSTALLER
+IF NOT %MC_SERVER_FORGEURL%==DISABLE (
+	ECHO Attempting to download "%MC_SERVER_FORGEURL%... this can take a moment, please wait." 
+	GOTO DOWNLOADINSTALLER
+)
 
 REM Download Forge Download Index HTML to parse the URL for the direct download
+ECHO INFO: Fetching index html from forge 1>> serverstart.log 2>&1
 bitsadmin /rawreturn /nowrap /transfer dlforgehtml /download /priority normal "https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html" "%CD%\forge-%MC_SERVER_MCVER%.html"  1>> serverstart.log 2>&1
 
 IF NOT EXIST forge-%MC_SERVER_MCVER%.html (
@@ -330,64 +386,51 @@ if "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
 	GOTO ERROR
 ) 
 
+ECHO Downloading FORGE (step 2 of 2). This can take several minutes, please be patient...
 
 :DOWNLOADINSTALLER
-ECHO Attempting to download "%MC_SERVER_FORGEURL%... this can take a moment, please wait." 
 ECHO DEBUG: Attempting to download "%MC_SERVER_FORGEURL%" 1>> serverstart.log 2>&1
 
 REM Attempt to download installer to a temp download
-bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority normal "%MC_SERVER_FORGEURL%" "%CD%\forge-installer-temp.jar"  1>> serverstart.log 2>&1
+bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority normal "%MC_SERVER_FORGEURL%" "%CD%\tmp-forgeinstaller.jar"  1>> serverstart.log 2>&1
 
 REM Check that temp-download installer was downloaded
-IF NOT EXIST "%CD%\forge-installer-temp.jar" (
+IF NOT EXIST "%CD%\tmp-forgeinstaller.jar" (
 	SET MC_SERVER_ERROR_REASON=ForgeInstallerDownloadFailed
 	GOTO ERROR
 )
 
 REM Rename temp installer to proper installer, replacing one that was there already
-DEL /F /Q forge-installer.jar  1>> serverstart.log 2>&1
-REN forge-installer-temp.jar forge-installer.jar  1>> serverstart.log 2>&1
-
+DEL /F /Q forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar  1>> serverstart.log 2>&1
+REN tmp-forgeinstaller.jar forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar  1>> serverstart.log 2>&1
+ECHO Download complete.
 
 :RUNINSTALLER
 ECHO.
 ECHO Installing Forge now, please wait...
 ECHO INFO: Starting Forge install now, details below: 1>> serverstart.log 2>&1
-java -jar forge-installer.jar --installServer 1>> serverstart.log 2>&1
+java -jar forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar --installServer 1>> serverstart.log 2>&1
 
-REM I'm not sure how to check if the forge-install failed or not...
-ECHO DEBUG: ERRORLEVEL after running forge installer: %ERRORLEVEL% 1>> serverstart.log 2>&1
-IF NOT %errorlevel% equ 0 (
-	SET MC_SERVER_ERROR_REASON=ForgeInstallFailed
-	GOTO ERROR
-)
+REM TODO: CHECKS TO VALIDATE SUCCESSFUL INSTALL
 
 REM File cleanup
-REN forge*universal.jar %MC_SERVER_FORGE_JAR%  1>> serverstart.log 2>&1
-DEL /F /Q forge-installer.jar  1>> serverstart.log 2>&1
+DEL /F /Q tmp-forgeinstaller.jar  1>> serverstart.log 2>&1
 DEL /F /Q forge-%MC_SERVER_MCVER%.html  1>> serverstart.log 2>&1
 
-REM Todo... maybe add check for libraries, minecraft and forge jar confirming install success?
-
-ECHO.
-ECHO.
-ECHO.
+CLS
 ECHO.
 ECHO Forge and Minecraft Download/Install complete!
 ECHO INFO: Download/Install complete... 1>> serverstart.log 2>&1
 ECHO.
-TIMEOUT 5
+TIMEOUT 3
 
 GOTO BEGIN
 
-
 :ERROR
-ECHO There was an Error...
-ECHO Error returned was "%MC_SERVER_ERROR_REASON%"
+ECHO There was an Error, Code: "%MC_SERVER_ERROR_REASON%"
 ECHO ERROR: Error flagged, reason is: "%MC_SERVER_ERROR_REASON%" 1>> serverstart.log 2>&1
 ECHO.
 GOTO CLEANUP
-
 
 :RESTARTER
 ECHO ERROR: At %MC_SERVER_CRASH_YYYYMMDD%:%MC_SERVER_CRASH_HHMMSS% Server has stopped. 1>> serverstart.log 2>&1
@@ -459,7 +502,6 @@ IF %ERRORLEVEL% GEQ 2 (
 	GOTO BEGIN
 )
 
-
 :CLEANUP
 ECHO WARN: Server startup script is exiting. Dumping current vars: 1>> serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>> serverstart.log 2>&1
@@ -500,8 +542,6 @@ SET MC_SERVER_CRASH_YYYYMMDD=
 SET MC_SERVER_CRASH_HHMMSS=
 
 REM Reset bitsadmin in case things got hung or errored
-bitsadmin /reset
+bitsadmin /reset 1>> serverstart.log 2>&1
 
-
-TIMEOUT 3
 :EOF
