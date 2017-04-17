@@ -156,7 +156,7 @@ ECHO DEBUG: MC_SERVER_CRASH_HHMMSS=%MC_SERVER_CRASH_HHMMSS% 1>>  %~dp0serverstar
 ECHO DEBUG: Current directory file listing: 1>>  %~dp0serverstart.log 2>&1
 DIR 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  %~dp0serverstart.log 2>&1
-java -d64 -version 1>>  %~dp0serverstart.log 2>&1
+java -d64 -version || GOTO JAVAERROR 1>>  %~dp0serverstart.log 2>&1
 
 :CHECKJAVA
 ECHO INFO: Checking java installation...
@@ -165,22 +165,26 @@ ECHO INFO: Checking java installation: 1>> %~dp0serverstart.log 2>&1
 java -d64 -version 2>&1 | FIND "1.8"  1>>  %~dp0serverstart.log 2>&1
 IF %ERRORLEVEL% EQU 0 (
 	ECHO INFO: Found 64-bit Java 1.8 1>> %~dp0serverstart.log 2>&1
+	ECHO ...64-bit Java 1.8 found! 1>> %~dp0serverstart.log 2>&1
+	GOTO CHECKFOLDER
 ) ELSE (
     java -d64 -version 2>&1 | FIND "1.9"  1>>  %~dp0serverstart.log 2>&1
 	IF %ERRORLEVEL% EQU 0 (
 		ECHO INFO: Found 64-bit Java 1.9 1>> %~dp0serverstart.log 2>&1
-	) ELSE (
-		ECHO ERROR: Could not find 64-bit Java 1.8 or 1.9 installed or in PATH 1>> %~dp0serverstart.log 2>&1
-		CLS
-		ECHO.
-		ECHO ERROR: Could not find valid java version installed. 
-		ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
-		ECHO https://java.com/en/download/manual.jsp
-		ECHO.
-		SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
-		GOTO ERROR
-	)
+		ECHO ...64-bit Java 1.9 found!
+	) ELSE ( GOTO JAVAERROR )
 )
+
+:JAVAERROR
+ECHO ERROR: Could not find 64-bit Java 1.8 or 1.9 installed or in PATH 1>> %~dp0serverstart.log 2>&1
+CLS
+ECHO.
+ECHO ERROR: Could not find valid java version installed. 
+ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
+ECHO https://java.com/en/download/manual.jsp
+ECHO.
+SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
+GOTO ERROR
 
 :CHECKFOLDER
 IF NOT %MC_SERVER_RUN_FROM_BAD_FOLDER% EQU 0 (
