@@ -21,7 +21,7 @@ SET MC_SERVER_ERROR_REASON=Unspecified
 REM this is a temp variable to use for intermidiate calculations and such
 SET MC_SERVER_TMP_FLAG=0
 REM this is the var to keep track of sequential crashes
-SET MC_SERVER_CRASH_COUNTER=0
+SET MC_SERVER_CRASH_COUNTER=1
 REM set "crash time" to initial script start 
 SET MC_SERVER_CRASH_YYYYMMDD=%date:~10,4%%date:~4,2%%date:~7,2%
 SET MC_SERVER_CRASH_HHMMSS=%time:~0,2%%time:~3,2%%time:~6,2%
@@ -39,7 +39,7 @@ ECHO DEBUG: Current Dir is %CD% -- trying to change to %~dp0 1>>  %~dp0serversta
 CD %~dp0 1>>  %~dp0serverstart.log 2>&1
 
 :BEGIN
-CLS
+REM CLS
 ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO :: Minecraft-Forge Server install/launcher script ::
@@ -153,6 +153,10 @@ ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  %~dp0serverstart.log 2>
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_YYYYMMDD=%MC_SERVER_CRASH_YYYYMMDD% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_HHMMSS=%MC_SERVER_CRASH_HHMMSS% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: Current directory file listing: 1>>  %~dp0serverstart.log 2>&1
+DIR 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  %~dp0serverstart.log 2>&1
+java -d64 -version 1>>  %~dp0serverstart.log 2>&1
 
 :CHECKJAVA
 ECHO INFO: Checking java installation...
@@ -287,10 +291,8 @@ IF MC_SERVER_TMP_FLAG EQU 1 (
 ECHO Checking for forge/minecraft binaries...
 ECHO INFO: Checking for forge/minecraft binaries... 1>>  %~dp0serverstart.log 2>&1
 
-FOR /f %%x in ('dir *forge*%MC_SERVER_FORGEVER%*universal*.jar /B /O:-D') DO SET MC_SERVER_FORGE_JAR=%%x & GOTO STARTSERVER
-
 REM Check if forge is already installed
-IF NOT EXIST "%~dp0%MC_SERVER_FORGE_JAR%" (
+IF NOT EXIST "%~dp0*forge*%MC_SERVER_FORGEVER%*universal*.jar" (
 	ECHO FORGE %MC_SERVER_FORGEVER% binary not found, re-installing...
 	ECHO INFO: FORGE %MC_SERVER_FORGEVER% not found, re-installing... 1>>  %~dp0serverstart.log 2>&1
 	GOTO INSTALLSTART
@@ -310,6 +312,8 @@ IF NOT EXIST "%~dp0libraries" (
 	GOTO INSTALLSTART
 )
 
+FOR /f %%x in ('dir *forge*%MC_SERVER_FORGEVER%*universal*.jar /B /O:-D') DO SET MC_SERVER_FORGE_JAR=%%x & GOTO STARTSERVER
+
 :STARTSERVER
 ECHO.
 ECHO.
@@ -323,6 +327,7 @@ REM If server is exited or crashes, restart...
 REM CLS
 ECHO.
 ECHO WARN: Server was stopped (possibly crashed)...
+GOTO RESTARTER
 
 :INSTALLSTART
 ECHO Clearing old files and installing forge/minecraft...
@@ -512,10 +517,14 @@ REM If we are still here, time difference is within threshold to increment count
 REM Check if already max failures:
 IF %MC_SERVER_CRASH_COUNTER% GEQ %MC_SERVER_MAX_CRASH% (
 	ECHO INFO: Last crash/startup was %MC_SERVER_TMP_FLAG%+ seconds ago 1>>  %~dp0serverstart.log 2>&1
-	ECHO ERROR: Server has stopped/crashed too many times!
+	ECHO.
+	ECHO.
+	ECHO ===================================================
+	ECHO  ERROR: Server has stopped/crashed too many times!
+	ECHO ===================================================
 	ECHO ERROR: Server has stopped/crashed too many times! 1>>  %~dp0serverstart.log 2>&1
 	ECHO Stopping script...
-	TIMEOUT 5
+	TIMEOUT 3
 	GOTO CLEANUP
 	)
 
