@@ -172,6 +172,7 @@ IF %ERRORLEVEL% EQU 0 (
 	IF %ERRORLEVEL% EQU 0 (
 		ECHO INFO: Found 64-bit Java 1.9 1>> %~dp0serverstart.log 2>&1
 		ECHO ...64-bit Java 1.9 found!
+		GOTO CHECKFOLDER
 	) ELSE ( GOTO JAVAERROR )
 )
 
@@ -321,7 +322,6 @@ IF NOT EXIST "%~dp0libraries" (
 FOR /f %%x in ('dir *forge*%MC_SERVER_FORGEVER%*universal*.jar /B /O:-D') DO SET MC_SERVER_FORGE_JAR=%%x & GOTO STARTSERVER
 
 :STARTSERVER
-
 ECHO.
 ECHO.
 ECHO Starting Server...
