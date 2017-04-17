@@ -172,19 +172,20 @@ IF %ERRORLEVEL% EQU 0 (
 	IF %ERRORLEVEL% EQU 0 (
 		ECHO INFO: Found 64-bit Java 1.9 1>> %~dp0serverstart.log 2>&1
 		ECHO ...64-bit Java 1.9 found!
-		GOTO CHECKFOLDER
 	) ELSE ( GOTO JAVAERROR )
 )
 
 :JAVAERROR
 ECHO ERROR: Could not find 64-bit Java 1.8 or 1.9 installed or in PATH 1>> %~dp0serverstart.log 2>&1
+SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
 CLS
 ECHO.
 ECHO ERROR: Could not find valid java version installed. 
+TIMEOUT 2
 ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
 ECHO https://java.com/en/download/manual.jsp
 ECHO.
-SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
+TIMEOUT 2
 GOTO ERROR
 
 :CHECKFOLDER
@@ -320,6 +321,7 @@ IF NOT EXIST "%~dp0libraries" (
 FOR /f %%x in ('dir *forge*%MC_SERVER_FORGEVER%*universal*.jar /B /O:-D') DO SET MC_SERVER_FORGE_JAR=%%x & GOTO STARTSERVER
 
 :STARTSERVER
+
 ECHO.
 ECHO.
 ECHO Starting Server...
@@ -461,13 +463,16 @@ ECHO  Forge and Minecraft Download/Install complete!
 ECHO ================================================
 ECHO INFO: Download/Install complete... 1>>  %~dp0serverstart.log 2>&1
 ECHO.
-TIMEOUT 10
+TIMEOUT 5
 GOTO BEGIN
 
 :ERROR
+ECHO.
+ECHO **** ERROR ****
 ECHO There was an Error, Code: "%MC_SERVER_ERROR_REASON%"
 ECHO ERROR: Error flagged, reason is: "%MC_SERVER_ERROR_REASON%" 1>>  %~dp0serverstart.log 2>&1
 ECHO.
+TIMEOUT 4
 GOTO CLEANUP
 
 :RESTARTER
@@ -529,7 +534,7 @@ IF %MC_SERVER_CRASH_COUNTER% GEQ %MC_SERVER_MAX_CRASH% (
 	ECHO ===================================================
 	ECHO ERROR: Server has stopped/crashed too many times! 1>>  %~dp0serverstart.log 2>&1
 	ECHO Stopping script...
-	TIMEOUT 3
+	PAUSE
 	GOTO CLEANUP
 	)
 
