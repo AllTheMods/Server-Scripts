@@ -182,11 +182,11 @@ SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
 CLS
 ECHO.
 ECHO ERROR: Could not find valid java version installed. 
-TIMEOUT 2
+>nul TIMEOUT 2
 ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
 ECHO https://java.com/en/download/manual.jsp
 ECHO.
-TIMEOUT 2
+>nul TIMEOUT 2
 GOTO ERROR
 
 :CHECKFOLDER
@@ -463,7 +463,7 @@ ECHO  Forge and Minecraft Download/Install complete!
 ECHO ================================================
 ECHO INFO: Download/Install complete... 1>>  %~dp0serverstart.log 2>&1
 ECHO.
-TIMEOUT 5
+>nul TIMEOUT 5
 GOTO BEGIN
 
 :ERROR
@@ -472,7 +472,7 @@ ECHO **** ERROR ****
 ECHO There was an Error, Code: "%MC_SERVER_ERROR_REASON%"
 ECHO ERROR: Error flagged, reason is: "%MC_SERVER_ERROR_REASON%" 1>>  %~dp0serverstart.log 2>&1
 ECHO.
-TIMEOUT 4
+>nul TIMEOUT 4
 GOTO CLEANUP
 
 :RESTARTER
@@ -526,6 +526,7 @@ IF %MC_SERVER_TMP_FLAG% GTR %MC_SERVER_CRASH_TIMER% (
 REM If we are still here, time difference is within threshold to increment counter
 REM Check if already max failures:
 IF %MC_SERVER_CRASH_COUNTER% GEQ %MC_SERVER_MAX_CRASH% (
+	SET MC_SERVER_ERROR_REASON=TooManyCrashes:%MC_SERVER_CRASH_COUNTER%
 	ECHO INFO: Last crash/startup was %MC_SERVER_TMP_FLAG%+ seconds ago 1>>  %~dp0serverstart.log 2>&1
 	ECHO.
 	ECHO.
@@ -533,9 +534,14 @@ IF %MC_SERVER_CRASH_COUNTER% GEQ %MC_SERVER_MAX_CRASH% (
 	ECHO  ERROR: Server has stopped/crashed too many times!
 	ECHO ===================================================
 	ECHO ERROR: Server has stopped/crashed too many times! 1>>  %~dp0serverstart.log 2>&1
+	ECHO.
+	>nul TIMEOUT 1
+	ECHO %MC_SERVER_CRASH_COUNTER% Crashes have been counted each within %MC_SERVER_CRASH_TIMER% seconds.
+	>nul TIMEOUT 1
 	ECHO Stopping script...
-	PAUSE
-	GOTO CLEANUP
+	ECHO.
+	>nul TIMEOUT 1
+	GOTO ERROR
 	)
 
 REM Still under threshold so lets increment and restart
