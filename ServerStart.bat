@@ -155,12 +155,14 @@ ECHO DEBUG: MC_SERVER_CRASH_YYYYMMDD=%MC_SERVER_CRASH_YYYYMMDD% 1>>  %~dp0server
 ECHO DEBUG: MC_SERVER_CRASH_HHMMSS=%MC_SERVER_CRASH_HHMMSS% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: Current directory file listing: 1>>  %~dp0serverstart.log 2>&1
 DIR 1>>  %~dp0serverstart.log 2>&1
-ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  %~dp0serverstart.log 2>&1
-java -d64 -version || GOTO JAVAERROR 1>>  %~dp0serverstart.log 2>&1
+
+REM Check for 64-bit OS, not needed since 64-bit java is checked
+REM reg query "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v PROCESSOR_ARCHITECTURE | find /i "x86" || GOTO CHECKJAVA 1>> %~dp0serverstart.log 2>&1
 
 :CHECKJAVA
 ECHO INFO: Checking java installation...
-ECHO INFO: Checking java installation: 1>> %~dp0serverstart.log 2>&1
+ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  %~dp0serverstart.log 2>&1
+java -d64 -version || GOTO JAVAERROR 1>>  %~dp0serverstart.log 2>&1
 
 java -d64 -version 2>&1 | FIND "1.8"  1>>  %~dp0serverstart.log 2>&1
 IF %ERRORLEVEL% EQU 0 (
