@@ -1,5 +1,4 @@
 @ECHO OFF
-SETLOCAL
 ::::
 :::: Minecraft-Forge Server install/launcher script
 :::: Created by the "All The Mods" pack team
@@ -15,6 +14,7 @@ SETLOCAL
 
 :: !!!! *** THIS FILE NOT INTENDED TO BE EDITED, USE "settings.cfg" INSTEAD !!!! ::
 
+SETLOCAL
 REM Internal Scripty stuff
 REM default an error code in case error block is ran without this var being defined first
 SET MC_SERVER_ERROR_REASON=Unspecified
@@ -39,7 +39,7 @@ ECHO DEBUG: Current Dir is %CD% -- trying to change to %~dp0 1>>  %~dp0serversta
 CD %~dp0 1>>  %~dp0serverstart.log 2>&1
 
 :BEGIN
-REM CLS
+CLS
 ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO :: Minecraft-Forge Server install/launcher script ::
@@ -62,7 +62,7 @@ IF NOT EXIST "%~dp0settings.cfg" (
 )
 
 ECHO DEBUG: settings.cfg Found. Logging full contents below: 1>>  %~dp0serverstart.log 2>&1
->nul COPY %~dp0serverstart.log+%~dp0settings.cfg %~dp0serverstart.log
+>nul COPY "%~dp0serverstart.log"+"%~dp0settings.cfg" "%~dp0serverstart.log"
 ECHO. 1>>  %~dp0serverstart.log 2>&1
 
 >nul FIND /I "MAX_RAM=" %~dp0settings.cfg || (
@@ -112,7 +112,7 @@ ECHO. 1>>  %~dp0serverstart.log 2>&1
 	
 REM  LOAD Settings from config
 ECHO INFO: Loading variables from settings.cfg 1>>  %~dp0serverstart.log 2>&1
-for /f "delims==; tokens=1,2" %%G in (settings.cfg) do set %%G=%%H
+for /f "delims==; tokens=1,2 eol=;" %%G in (settings.cfg) do set %%G=%%H
 
 REM Re-map imported vars
 SET MC_SERVER_MAX_RAM=%MAX_RAM%
@@ -124,6 +124,7 @@ SET MC_SERVER_IGNORE_OFFLINE=%IGNORE_OFFLINE%
 SET MC_SERVER_MCVER=%MCVER%
 SET MC_SERVER_FORGEVER=%FORGEVER%
 SET MC_SERVER_FORGEURL=%FORGEURL%
+SET MC_SERVER_SPONGE=%USE_SPONGE%
 
 REM Cleanup imported vars after being remapped
 SET MAX_RAM=
@@ -136,10 +137,15 @@ SET IGNORE_OFFLINE=
 SET MCVER=
 SET FORGEVER=
 SET FORGEURL=
+SET USE_SPONGE=
+
+REM Get forge shorthand version number
+SET MC_SERVER_FORGESHORT=%MC_SERVER_FORGEVER:~-4%
 
 ECHO DEBUG: Starting variable definitions: 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGE_JAR=%MC_SERVER_FORGE_JAR% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGE_BOOT=%MC_SERVER_SPONGE_BOOT% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_JVM_ARGS=%MC_SERVER_JVM_ARGS% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_CRASH=%MC_SERVER_MAX_CRASH% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_TIMER=%MC_SERVER_CRASH_TIMER% 1>>  %~dp0serverstart.log 2>&1
@@ -147,7 +153,9 @@ ECHO DEBUG: MC_SERVER_IGNORE_OFFLINE=%MC_SERVER_IGNORE_OFFLINE% 1>>  %~dp0server
 ECHO DEBUG: MC_SERVER_RUN_FROM_BAD_FOLDER=%MC_SERVER_RUN_FROM_BAD_FOLDER% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MCVER=%MC_SERVER_MCVER% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGEVER=%MC_SERVER_FORGEVER% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_FORGESHORT=%MC_SERVER_FORGESHORT% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGEURL=%MC_SERVER_FORGEURL% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  %~dp0serverstart.log 2>&1
@@ -321,7 +329,50 @@ IF NOT EXIST "%~dp0libraries" (
 	GOTO INSTALLSTART
 )
 
-FOR /f %%x in ('dir *forge*%MC_SERVER_FORGEVER%*universal*.jar /B /O:-D') DO SET MC_SERVER_FORGE_JAR=%%x & GOTO STARTSERVER
+REM Sponge?
+IF %MC_SERVER_SPONGE% EQU 1 (
+	ECHO.
+	ECHO. **** WARNING ****
+	ECHO SPONGE has been enabled in settings.cfg -- this is experimental and can cause unexpected problems
+	ECHO USE SPONGE AT YOUR OWN RISK
+	ECHO SPONGE has been enabled in settings.cfg -- this is experimental and can cause unexpected problems USE AT YOUR OWN RISK  1>>  %~dp0serverstart.log 2>&1
+	ECHO.
+	REM create "/mods/" folder if it doesn't exist
+	IF NOT EXIST "%~dp0mods" (
+		ECHO Mods folder not found, creating it
+		ECHO INFO: Mods folder not found, creating it 1>>  %~dp0serverstart.log 2>&1
+		MKDIR %~dp0mods 1>>  %~dp0serverstart.log 2>&1
+	)
+	REM Check for spongeforge jar in /mods/
+	IF NOT EXIST "%~dp0mods/*spongeforge*%MC_SERVER_MCVER%*%MC_SERVER_FORGESHORT%*.jar" (
+		ECHO SpongeForge JAR for Forge %MC_SERVER_FORGESHORT% not found in "mods" folder...
+		ECHO INFO: SpongeForge JAR not found in "mods" folder  1>>  %~dp0serverstart.log 2>&1
+		GOTO DOWNLOADSPONGE
+	)
+	REM Check for spongeforge bootstrapper
+	IF NOT EXIST "%~dp0*sponge*bootstrap*.jar" (
+		ECHO SpongeForge Bootstrap loader not found...
+		ECHO INFO: SpongeForge Bootstrap loader not found 1>>  %~dp0serverstart.log 2>&1
+		GOTO DOWNLOADSPONGE
+	)	
+)
+
+REM set absolute paths for binary JARs
+(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%*universal*.jar^" /B /O:-D`) DO SET "MC_SERVER_FORGE_JAR=%%x" & GOTO CHECKFILES1) 1>>%~dp0serverstart.log 2>&1
+
+:CHECKFILES1
+(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*sponge*bootstrap*.jar^" /B /O:-D`) DO SET "MC_SERVER_SPONGE_BOOT=%%x" & GOTO CHECKFILES2) 1>>%~dp0serverstart.log 2>&1
+
+:CHECKFILES2
+REM Delete duplicate binary JARs
+ECHO DEBUG: MC_SERVER_SPONGE_BOOT=%MC_SERVER_SPONGE_BOOT% 1>>%~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_FORGE_JAR=%MC_SERVER_FORGE_JAR% 1>>%~dp0serverstart.log 2>&1
+ATTRIB +R "%MC_SERVER_SPONGE_BOOT%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Sponge Jar present to read-only 1>>%~dp0serverstart.log 2>&1
+ATTRIB +R "%MC_SERVER_FORGE_JAR%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Jar present to read-only 1>>%~dp0serverstart.log 2>&1
+DEL %~dp0*forge*universal*.jar /A:-R  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Sponge Jars present to delete 1>>%~dp0serverstart.log 2>&1
+DEL %~dp0*sponge*bootstrap*.jar /A:-R  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Jars present to delete 1>>%~dp0serverstart.log 2>&1
+ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Sponge Jar present to UN-read-only 1>>%~dp0serverstart.log 2>&1
+ATTRIB -R "%MC_SERVER_FORGE_JAR%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Jar present to UN-read-only 1>>%~dp0serverstart.log 2>&1
 
 :STARTSERVER
 ECHO.
@@ -330,7 +381,17 @@ ECHO Starting Server...
 ECHO INFO: Starting Server... 1>>  %~dp0serverstart.log 2>&1
 
 REM Batch will wait here indefinetly while MC server is running
-java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
+IF %MC_SERVER_SPONGE% EQU 1 (
+	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ]
+	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ] 1>>%~dp0serverstart.log 2>&1
+	java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui
+) ELSE (
+	ECHO DEBUG: Disabling any spongeforge jar in \mods\ because USE_SPONGE is disabled in settings.cfg 1>>%~dp0serverstart.log 2>&1
+	(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0mods\*spongeforge*.jar" /B /O:-D') DO MOVE /Y "%~dp0mods\%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
+	java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
+	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ]
+	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ] 1>>%~dp0serverstart.log 2>&1
+)
 
 REM If server is exited or crashes, restart...
 REM CLS
@@ -344,6 +405,16 @@ ECHO INFO: Clearing and installing forge/minecraft... 1>>  %~dp0serverstart.log 
 
 REM Just in case there's anything pending or dupe-named before starting...
 bitsadmin /reset 1>>  %~dp0serverstart.log 2>&1
+
+(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0*forge*%MC_SERVER_MCVER%*%MC_SERVER_FORGEVER%*installer.jar" /B /O:-D') DO SET "MC_SERVER_TMP_FLAG=%%x" & GOTO INSTALL1) 1>>%~dp0serverstart.log 2>&1
+
+:INSTALL1
+REM Delete old/duplicate installers
+ECHO: DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>%~dp0serverstart.log 2>&1
+ATTRIB +R "%MC_SERVER_TMP_FLAG%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Installer present to read-only 1>>%~dp0serverstart.log 2>&1
+DEL %~dp0*forge*installer*.jar* /A:-R  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Installers present to delete 1>>%~dp0serverstart.log 2>&1
+ATTRIB -R "%MC_SERVER_TMP_FLAG%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Installer present to UN-read-only 1>>%~dp0serverstart.log 2>&1
+SET MC_SERVER_TMP_FLAG= 1>>%~dp0serverstart.log 2>&1
 
 REM Check for existing/included forge-installer and run it instead of downloading
 IF EXIST "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" (
@@ -365,10 +436,11 @@ IF %ERRORLEVEL% EQU 0 (
 	GOTO ERROR
 )
 
-DEL /F /Q "%~dp0forge-index.html" 1>>  %~dp0serverstart.log 2>&1
-DEL /F /Q "%~dp0*forge*%MC_SERVER_FORGEVER%*universal*" 1>>  %~dp0serverstart.log 2>&1
-DEL /F /Q "%~dp0tmp-forgeinstaller.jar"  1>>  %~dp0serverstart.log 2>&1
-RMDIR /S /Q "%~dp0libraries"  1>>  %~dp0serverstart.log 2>&1
+DEL /F /Q "%~dp0*forge*.html"  1>> %~dp0serverstart.log 2>&1 || ECHO INFO: No forge-index to delete 1>>  %~dp0serverstart.log 2>&1
+DEL /F /Q "%~dp0*forge*universal*"  1>> %~dp0serverstart.log 2>&1 || ECHO INFO: No forge-universal to delete 1>>  %~dp0serverstart.log 2>&1
+DEL /F /Q "%~dp0*tmp-forgeinstaller.jar" 1>> %~dp0serverstart.log 2>&1 || ECHO INFO: No forge-installer to delete 1>> %~dp0serverstart.log 2>&1
+DEL /F /Q "%~dp0*minecraft*server*%MC_SERVER_MCVER%*.jar" 1>> %~dp0serverstart.log 2>&1 || ECHO INFO: No minecraft binary to delete 1>> %~dp0serverstart.log 2>&1
+RMDIR /S /Q "%~dp0libraries" 1>>  %~dp0serverstart.log 2>&1 || ECHO INFO: No Libraries folder to delete 1>> %~dp0serverstart.log 2>&1
 
 ECHO.
 ECHO.
@@ -384,36 +456,50 @@ SET MC_SERVER_TMP_FLAG=0
 
 :FETCHHTML
 REM Download Forge Download Index HTML to parse the URL for the direct download
-ECHO INFO: Fetching index html from forge 1>>  %~dp0serverstart.log 2>&1
-bitsadmin /rawreturn /nowrap /transfer dlforgehtml /download /priority normal "https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html" "%~dp0forge-%MC_SERVER_MCVER%.html"  1>>  %~dp0serverstart.log 2>&1
+ECHO INFO: Fetching index html from forge ^( https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html ^) 1>>  %~dp0serverstart.log 2>&1
+bitsadmin /rawreturn /nowrap /transfer dlforgehtml /download /priority FOREGROUND "https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html" "%~dp0forge-%MC_SERVER_MCVER%.html"  1>> %~dp0serverstart.log 2>&1
 
 IF NOT EXIST "%~dp0forge-%MC_SERVER_MCVER%.html" (
-	SET MC_SERVER_ERROR_REASON=ForgeIndexNotFound
-	GOTO ERROR
-)
-
-REM Simple search for matching text to make sure we got the correct webpage/html (and not a 404, for example)
-ECHO DEBUG: Checking simple pattern match for forge ver to validate HTML... 1>>  %~dp0serverstart.log 2>&1
->nul FIND /I "%MC_SERVER_FORGEVER%" "%~dp0forge-%MC_SERVER_MCVER%.html" || (
-	IF %MC_SERVER_TMP_FLAG% EQU 0 (
-		ECHO Something wrong with download part 1 of 2
-		ECHO Something wrong with download part 1 of 2 1>>  %~dp0serverstart.log 2>&1
+	IF "%MC_SERVER_TMP_FLAG%"=="0" (
+		ECHO Something went wrong, trying again...
 		SET MC_SERVER_TMP_FLAG=1
 		GOTO FETCHHTML
 	) ELSE (
-		ECHO HTML Download failed a second time... stopping. 
-		ECHO ERROR: HTML Download failed a second time... stopping. 1>>  %~dp0serverstart.log 2>&1
-		SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
+		SET MC_SERVER_ERROR_REASON=ForgeIndexNotFound
 		GOTO ERROR
 	)
 )
 
-REM More complex wannabe-regex (aka magic)
-FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('findstr /ir "http:\/\/files.*%MC_SERVER_FORGEVER%.*installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G
+REM Simple search for matching text to make sure we got the correct webpage/html (and not a 404, for example)
+REM ECHO DEBUG: Checking simple pattern match for forge ver to validate HTML... 1>>  %~dp0serverstart.log 2>&1
+REM FIND /I "%MC_SERVER_FORGEVER%" forge-%MC_SERVER_MCVER%.html 1>> %~dp0serverstart.log 2>&1 || (
+REM 	IF %MC_SERVER_TMP_FLAG% LEQ 0 (
+REM 		ECHO Something wrong with Forge download part 1 of 2
+REM 		ECHO Something wrong with Forge download part 1 of 2 1>>  %~dp0serverstart.log 2>&1
+REM 		SET MC_SERVER_TMP_FLAG=1
+REM 		DEL /F /Q "%~dp0*forge-index.html"  1>> %~dp0serverstart.log 2>&1 || ECHO INFO: No forge-index to delete 1>>  %~dp0serverstart.log 2>&1
+REM 		GOTO FETCHHTML
+REM 	) ELSE (
+REM 		ECHO HTML Download failed a second time... stopping. 
+REM 		ECHO ERROR: HTML Download failed a second time... stopping. 1>>  %~dp0serverstart.log 2>&1
+REM 		SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
+REM 		GOTO ERROR
+REM 	)
+REM )
 
-if "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
-	SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
-	GOTO ERROR
+REM More complex wannabe-regex (aka magic)
+FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('findstr /ir "http:\/\/files.*%MC_SERVER_FORGEVER%.*installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G & GOTO FETCHHTML1
+
+:FETCHHTML1
+IF "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
+	IF "%MC_SERVER_TMP_FLAG%"=="0" (
+		ECHO Something went wrong, trying again...
+		SET MC_SERVER_TMP_FLAG=1
+		GOTO FETCHHTML
+	) ELSE (
+		SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
+		GOTO ERROR
+	)
 ) 
 
 ECHO Downloading FORGE (step 2 of 2). This can take several minutes, please be patient...
@@ -422,11 +508,11 @@ SET MC_SERVER_TMP_FLAG=0
 :DOWNLOADINSTALLER
 REM Attempt to download installer to a temp download
 ECHO DEBUG: Attempting to download "%MC_SERVER_FORGEURL%" 1>> %~dp0serverstart.log 2>&1
-bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority normal "%MC_SERVER_FORGEURL%" "%~dp0tmp-forgeinstaller.jar"  1>>  %~dp0serverstart.log 2>&1
+bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority FOREGROUND %MC_SERVER_FORGEURL% "%~dp0tmp-forgeinstaller.jar"  1>>  %~dp0serverstart.log 2>&1
 
 REM Check that temp-download installer was downloaded
 IF NOT EXIST "%~dp0tmp-forgeinstaller.jar" (
-IF %MC_SERVER_TMP_FLAG% EQU 0 (
+IF "%MC_SERVER_TMP_FLAG%"=="0" (
 		ECHO Something wrong with download 2 of 2 - FORGE installer, trying again... 
 		ECHO Something wrong with download 2 of 2 - FORGE installer, trying again...  1>>  %~dp0serverstart.log 2>&1
 		SET MC_SERVER_TMP_FLAG=1
@@ -441,7 +527,7 @@ IF %MC_SERVER_TMP_FLAG% EQU 0 (
 
 REM Rename temp installer to proper installer, replacing one that was there already
 DEL /F /Q "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" 1>>  %~dp0serverstart.log 2>&1
-REN "%~dp0tmp-forgeinstaller.jar" "forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar"  1>>  %~dp0serverstart.log 2>&1
+MOVE /Y "%~dp0tmp-forgeinstaller.jar" "forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar"  1>>  %~dp0serverstart.log 2>&1
 ECHO Download complete.
 
 :RUNINSTALLER
@@ -467,6 +553,32 @@ ECHO INFO: Download/Install complete... 1>>  %~dp0serverstart.log 2>&1
 ECHO.
 >nul TIMEOUT 5
 GOTO BEGIN
+
+:DOWNLOADSPONGE
+REM Download not implemented yet, WIP
+
+REM Rename any spongeforge*.jar to .jar.disabled
+(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0mods\*spongeforge*.jar" /B /O:-D') DO MOVE /Y "%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
+
+REM Rename any sponge*bootstrap*.jar to .jar.disabled
+(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0*sponge*bootstrap*.jar" /B /O:-D') DO MOVE /Y "%~dp0%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
+
+REM Download spongeforge index to parse for jar download
+bitsadmin /rawreturn /nowrap /transfer dlspongehtml /download /priority FOREGROUND "https://www.spongepowered.org/downloads/spongeforge/stable/%MC_SERVER_MCVER%" "%~dp0spongeforge-%MC_SERVER_MCVER%.html"  1>> %~dp0serverstart.log 2>&1
+
+REM Download sponge bootstrap html to parse for jar download   https://github.com/simon816/SpongeBootstrap/releases/latest
+bitsadmin /rawreturn /nowrap /transfer dlspongebootstrap /download /priority FOREGROUND "https://github.com/simon816/SpongeBootstrap/releases/tag/v0.3.0" "%~dp0spongebootstrap.html"  1>> %~dp0serverstart.log 2>&1
+
+ECHO.
+ECHO SPONGE has been enabled in settings.cfg but was not found installed
+ECHO Currently, if you want to use SPONGE you must download an appropriate SpongeForge version as 
+ECHO well as the SpongeBootstrap loader. 
+ECHO.
+ECHO SPONGE is currently unsupported officially YOU MAY NOT RECIEVE SUPPORT from modpack developers
+ECHO Please contact SPONGE team if you need more information OR DISABLE SPONGE in settings.cfg
+ECHO.
+PAUSE
+GOTO CLEANUP
 
 :ERROR
 ECHO.
@@ -570,6 +682,7 @@ IF %ERRORLEVEL% GEQ 2 (
 ECHO WARN: Server startup script is exiting. Dumping current vars: 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGE_JAR=%MC_SERVER_FORGE_JAR% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGE_BOOT=%MC_SERVER_SPONGE_BOOT% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_JVM_ARGS=%MC_SERVER_JVM_ARGS% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_CRASH=%MC_SERVER_MAX_CRASH% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_TIMER=%MC_SERVER_CRASH_TIMER% 1>>  %~dp0serverstart.log 2>&1
@@ -577,7 +690,9 @@ ECHO DEBUG: MC_SERVER_IGNORE_OFFLINE=%MC_SERVER_IGNORE_OFFLINE% 1>>  %~dp0server
 ECHO DEBUG: MC_SERVER_RUN_FROM_BAD_FOLDER=%MC_SERVER_RUN_FROM_BAD_FOLDER% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MCVER=%MC_SERVER_MCVER% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGEVER=%MC_SERVER_FORGEVER% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_FORGESHORT=%MC_SERVER_FORGESHORT% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGEURL=%MC_SERVER_FORGEURL% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  %~dp0serverstart.log 2>&1
@@ -591,6 +706,7 @@ java -d64 -version 1>>  %~dp0serverstart.log 2>&1
 REM Clear variables -- probably not necessary since we SETLOCAL but doesn't hurt either
 SET MC_SERVER_MAX_RAM=
 SET MC_SERVER_FORGE_JAR=
+SET MC_SERVER_SPONGE_BOOT=
 SET MC_SERVER_JVM_ARGS=
 SET MC_SERVER_MAX_CRASH=
 SET MC_SERVER_CRASH_TIMER=
@@ -598,7 +714,9 @@ SET MC_SERVER_IGNORE_OFFLINE=
 SET MC_SERVER_RUN_FROM_BAD_FOLDER=
 SET MC_SERVER_MCVER=
 SET MC_SERVER_FORGEVER=
+SET MC_SERVER_FORGESHORT=
 SET MC_SERVER_FORGEURL=
+SET MC_SERVER_SPONGE=
 SET MC_SERVER_ERROR_REASON=
 SET MC_SERVER_TMP_FLAG=
 SET MC_SERVER_CRASH_COUNTER=
@@ -609,3 +727,4 @@ REM Reset bitsadmin in case things got hung or errored
 bitsadmin /reset 1>>  %~dp0serverstart.log 2>&1
 
 :EOF
+ 
