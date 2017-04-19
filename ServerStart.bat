@@ -40,19 +40,7 @@ CD %~dp0 1>>  %~dp0serverstart.log 2>&1
 
 :BEGIN
 CLS
-ECHO.
-ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
-ECHO :: Minecraft-Forge Server install/launcher script ::
-ECHO :: (Created by the "All The Mods" modpack team)   ::
-ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
-ECHO.
-ECHO This script will launch a Minecraft Forge Modded server
-ECHO.
-ECHO FOR HELP (or more details);
-ECHO    Github:   https://github.com/AllTheMods/Server-Scripts
-ECHO    Discord:  https://discord.gg/FdFDVWb
-ECHO.
-ECHO.
+COLOR 3F
 
 REM Check for config file
 ECHO INFO: Checking that settings.cfg exists 1>> %~dp0serverstart.log 2>&1
@@ -125,6 +113,7 @@ SET MC_SERVER_MCVER=%MCVER%
 SET MC_SERVER_FORGEVER=%FORGEVER%
 SET MC_SERVER_FORGEURL=%FORGEURL%
 SET MC_SERVER_SPONGE=%USE_SPONGE%
+SET MC_SERVER_PACKNAME=%MODPACK_NAME%
 
 REM Cleanup imported vars after being remapped
 SET MAX_RAM=
@@ -138,9 +127,31 @@ SET MCVER=
 SET FORGEVER=
 SET FORGEURL=
 SET USE_SPONGE=
+SET MODPACK_NAME=
 
 REM Get forge shorthand version number
 SET MC_SERVER_FORGESHORT=%MC_SERVER_FORGEVER:~-4%
+
+TITLE %MC_SERVER_PACKNAME% ServerStart Script
+ECHO.
+ECHO *** Loading %MC_SERVER_PACKNAME% Server ***
+ECHO Running Forge %MC_SERVER_FORGESHORT% for Minecraft %MC_SERVER_MCVER%
+TIMEOUT 1 >nul
+ECHO.
+ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
+ECHO    Minecraft-Forge Server install/launcher script
+ECHO    (Created by the "All The Mods" modpack team)
+ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
+ECHO.
+ECHO This script will launch a Minecraft Forge Modded server
+ECHO.
+ECHO FOR HELP (or more details);
+ECHO    Github:   https://github.com/AllTheMods/Server-Scripts
+ECHO    Discord:  https://discord.gg/FdFDVWb
+ECHO.
+ECHO.
+
+
 
 ECHO DEBUG: Starting variable definitions: 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>>  %~dp0serverstart.log 2>&1
@@ -156,6 +167,9 @@ ECHO DEBUG: MC_SERVER_FORGEVER=%MC_SERVER_FORGEVER% 1>>  %~dp0serverstart.log 2>
 ECHO DEBUG: MC_SERVER_FORGESHORT=%MC_SERVER_FORGESHORT% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGEURL=%MC_SERVER_FORGEURL% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_PACKNAME=%MC_SERVER_PACKNAME% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGEURL=%MC_SERVER_SPONGEURL% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  %~dp0serverstart.log 2>&1
@@ -187,16 +201,17 @@ IF %ERRORLEVEL% EQU 0 (
 )
 
 :JAVAERROR
+COLOR CF
 ECHO ERROR: Could not find 64-bit Java 1.8 or 1.9 installed or in PATH 1>> %~dp0serverstart.log 2>&1
 SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
 CLS
 ECHO.
 ECHO ERROR: Could not find valid java version installed. 
->nul TIMEOUT 2
+>nul TIMEOUT 1
 ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
 ECHO https://java.com/en/download/manual.jsp
 ECHO.
->nul TIMEOUT 2
+>nul TIMEOUT 1
 GOTO ERROR
 
 :CHECKFOLDER
@@ -333,8 +348,9 @@ REM Sponge?
 IF %MC_SERVER_SPONGE% EQU 1 (
 	ECHO.
 	ECHO. **** WARNING ****
-	ECHO SPONGE has been enabled in settings.cfg -- this is experimental and can cause unexpected problems
-	ECHO USE SPONGE AT YOUR OWN RISK
+	ECHO SPONGE has been enabled in settings.cfg
+	ECHO Using Sponge with this modpack is experimental and can cause unexpected problems
+	ECHO **** USE SPONGE AT YOUR OWN RISK ****
 	ECHO SPONGE has been enabled in settings.cfg -- this is experimental and can cause unexpected problems USE AT YOUR OWN RISK  1>>  %~dp0serverstart.log 2>&1
 	ECHO.
 	REM create "/mods/" folder if it doesn't exist
@@ -351,7 +367,7 @@ IF %MC_SERVER_SPONGE% EQU 1 (
 	)
 	REM Check for spongeforge bootstrapper
 	IF NOT EXIST "%~dp0*sponge*bootstrap*.jar" (
-		ECHO SpongeForge Bootstrap loader not found...
+		ECHO SpongeBootstrap loader not found...
 		ECHO INFO: SpongeForge Bootstrap loader not found 1>>  %~dp0serverstart.log 2>&1
 		GOTO DOWNLOADSPONGE
 	)	
@@ -375,9 +391,11 @@ ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: 
 ATTRIB -R "%MC_SERVER_FORGE_JAR%"  1>>%~dp0serverstart.log 2>&1 || ECHO INFO: No Forge Jar present to UN-read-only 1>>%~dp0serverstart.log 2>&1
 
 :STARTSERVER
+COLOR
+TITLE %MC_SERVER_PACKNAME% Server Running
 ECHO.
 ECHO.
-ECHO Starting Server...
+ECHO Starting %MC_SERVER_PACKNAME% Server...
 ECHO INFO: Starting Server... 1>>  %~dp0serverstart.log 2>&1
 
 REM Batch will wait here indefinetly while MC server is running
@@ -396,11 +414,13 @@ IF %MC_SERVER_SPONGE% EQU 1 (
 REM If server is exited or crashes, restart...
 REM CLS
 ECHO.
-ECHO WARN: Server was stopped (possibly crashed)...
+ECHO WARN: %MC_SERVER_PACKNAME% Server was stopped (possibly crashed)...
 GOTO RESTARTER
 
 :INSTALLSTART
-ECHO Clearing old files and installing forge/minecraft...
+COLOR 5F
+TITLE INSTALLING Forge/Minecraft for %MC_SERVER_PACKNAME% server
+ECHO Clearing old files before installing forge/minecraft...
 ECHO INFO: Clearing and installing forge/minecraft... 1>>  %~dp0serverstart.log 2>&1
 
 REM Just in case there's anything pending or dupe-named before starting...
@@ -542,7 +562,7 @@ REM File cleanup
 DEL /F /Q "%~dp0tmp-forgeinstaller.jar"  1>>  %~dp0serverstart.log 2>&1
 DEL /F /Q "%~dp0forge-%MC_SERVER_MCVER%.html"  1>>  %~dp0serverstart.log 2>&1
 
-ECHO.
+COLOR 2F
 ECHO.
 ECHO.
 ECHO.
@@ -551,47 +571,89 @@ ECHO  Forge and Minecraft Download/Install complete!
 ECHO ================================================
 ECHO INFO: Download/Install complete... 1>>  %~dp0serverstart.log 2>&1
 ECHO.
->nul TIMEOUT 5
+>nul TIMEOUT 4
 GOTO BEGIN
 
 :DOWNLOADSPONGE
-REM Download not implemented yet, WIP
+REM Auto-Download not implemented yet, and might not ever be
+REM Problems with scraping github for link for bootsreapper were problematic
 
-REM Rename any spongeforge*.jar to .jar.disabled
-(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0mods\*spongeforge*.jar" /B /O:-D') DO MOVE /Y "%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
+REM ---Rename any spongeforge*.jar to .jar.disabled
+REM (FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0mods\*spongeforge*.jar" /B /O:-D') DO MOVE /Y "%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
+REM ---Rename any sponge*bootstrap*.jar to .jar.disabled
+REM (FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0*sponge*bootstrap*.jar" /B /O:-D') DO MOVE /Y "%~dp0%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
+REM ---Download spongeforge index to parse for jar download
+REM bitsadmin /rawreturn /nowrap /transfer dlspongehtml /download /priority FOREGROUND "http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/index_%MC_SERVER_MCVER%.html" "%~dp0spongeforge-%MC_SERVER_MCVER%.html"  1>> %~dp0serverstart.log 2>&1
+REM ---Download sponge bootstrap html to parse for jar download 
+REM bitsadmin /rawreturn /nowrap /transfer dlspongebootstrap /download /priority FOREGROUND "https://api.github.com/repos/simon816/spongebootstrap/releases/latest" "%~dp0spongebootstrap.html"  1>> %~dp0serverstart.log 2>&1
+REM ---Find latest bootstrap download and save to var
+REM FOR /f tokens^=* delims^=^" %%F in ('findstr /ir "https:\/\/github.*releases.*Bootstrap.*\.jar" "%~dp0spongebootstrap.html"') DO (
+REM 	SET "MC_SERVER_SPONGEBOOTSTRAPURL=%%F"
+REM 	FOR /f tokens^=^30 delims^=^/ %%B in ("%%G") DO ECHO Bootstrap Filename: %%B
+REM ---Find latest SpongeForge download and save to var http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/1.10.2-2281-5.2.0-BETA-2274/spongeforge-1.10.2-2281-5.2.0-BETA-2274.jar
+REM FOR /f tokens^=* delims^=^" %%G in ('findstr /ir "https:\/\/files.*%MC_SERVER_MCVER%.*%MC_SERVER_FORGESHORT%.*[0-9]*\.jar" "%~dp0spongeforge-%MC_SERVER_MCVER%.html"') DO (
+REM 	SET "MC_SERVER_SPONGEURL=%%G"
+REM 	FOR /f tokens^=^30 delims^=^/ %%S in ("%%G") DO ECHO SpongeForge Filename: %%S
+REM )
+REM ECHO DEBUG: Attempting to download "%MC_SERVER_SPONGEBOOTSTRAPURL%" 1>> %~dp0serverstart.log 2>&1
+REM bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority FOREGROUND %MC_SERVER_SPONGEBOOTSTRAPURL% "%~dp0%%B"  1>>  %~dp0serverstart.log 2>&1
+REM ECHO DEBUG: Attempting to download "%MC_SERVER_SPONGEURL%" 1>> %~dp0serverstart.log 2>&1
+REM bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority FOREGROUND %MC_SERVER_SPONGEURL% "%~dp0%%S"  1>>  %~dp0serverstart.log 2>&1
 
-REM Rename any sponge*bootstrap*.jar to .jar.disabled
-(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0*sponge*bootstrap*.jar" /B /O:-D') DO MOVE /Y "%~dp0%%x" "%%x.disabled") 1>>%~dp0serverstart.log 2>&1
-
-REM Download spongeforge index to parse for jar download
-bitsadmin /rawreturn /nowrap /transfer dlspongehtml /download /priority FOREGROUND "https://www.spongepowered.org/downloads/spongeforge/stable/%MC_SERVER_MCVER%" "%~dp0spongeforge-%MC_SERVER_MCVER%.html"  1>> %~dp0serverstart.log 2>&1
-
-REM Download sponge bootstrap html to parse for jar download   https://github.com/simon816/SpongeBootstrap/releases/latest
-bitsadmin /rawreturn /nowrap /transfer dlspongebootstrap /download /priority FOREGROUND "https://github.com/simon816/SpongeBootstrap/releases/tag/v0.3.0" "%~dp0spongebootstrap.html"  1>> %~dp0serverstart.log 2>&1
-
+CLS
+TITLE ERROR! SPONGE FILES NOT FOUND!! (ServerStart)
+COLOR cf
 ECHO.
-ECHO SPONGE has been enabled in settings.cfg but was not found installed
-ECHO Currently, if you want to use SPONGE you must download an appropriate SpongeForge version as 
-ECHO well as the SpongeBootstrap loader. 
+ECHO **** ERROR ****
+ECHO SPONGE has been enabled in settings.cfg but necessary files were not found...
 ECHO.
-ECHO SPONGE is currently unsupported officially YOU MAY NOT RECIEVE SUPPORT from modpack developers
-ECHO Please contact SPONGE team if you need more information OR DISABLE SPONGE in settings.cfg
+ECHO To use Sponge:
+ECHO    1) "MODS" folder must have a SpongeForge JAR matching Forge %MC_SERVER_FORGESHORT%
+ECHO    2) SpongeBootstrap JAR must be present in same folder as Forge "universal"
 ECHO.
+ECHO **** PLEASE NOTE ****
+ECHO YOU MAY NOT RECIEVE SUPPORT from modpack devs if you use Sponge
+ECHO Use at your own risk OR DISABLE SPONGE in settings.cfg
+ECHO.
+TIMEOUT 1 >nul 
+COLOR 4f
+TIMEOUT 1 >nul 
+COLOR cf
+TIMEOUT 1 >nul 
+COLOR 4f
+TIMEOUT 1 >nul
+COLOR cf
+TIMEOUT 1 >nul
+COLOR 0c
 PAUSE
 GOTO CLEANUP
 
 :ERROR
+COLOR cf
+TITLE ERROR - "%MC_SERVER_ERROR_REASON%" - Script Stopped
 ECHO.
 ECHO **** ERROR ****
 ECHO There was an Error, Code: "%MC_SERVER_ERROR_REASON%"
 ECHO ERROR: Error flagged, reason is: "%MC_SERVER_ERROR_REASON%" 1>>  %~dp0serverstart.log 2>&1
 ECHO.
->nul TIMEOUT 4
+TIMEOUT 1 >nul 
+COLOR 4f
+TIMEOUT 1 >nul 
+COLOR cf
+TIMEOUT 1 >nul 
+COLOR 4f
+TIMEOUT 1 >nul
+COLOR cf
+TIMEOUT 1 >nul
+COLOR 0c
 GOTO CLEANUP
 
 :RESTARTER
+COLOR 6F
 REM Quick-check EULA before commencing full restarter logic
 >nul FIND /I "eula=true" %~dp0eula.txt || (
+	TITLE ERROR: EULA.TXT Must be updated before %MC_SERVER_PACKNAME% server can start
+	CLS
 	ECHO.
 	ECHO Could not find "eula=true" in eula.txt file
 	ECHO Please edit and save the EULA file before continuing.
@@ -640,6 +702,7 @@ IF %MC_SERVER_TMP_FLAG% GTR %MC_SERVER_CRASH_TIMER% (
 REM If we are still here, time difference is within threshold to increment counter
 REM Check if already max failures:
 IF %MC_SERVER_CRASH_COUNTER% GEQ %MC_SERVER_MAX_CRASH% (
+	COLOR cf
 	SET MC_SERVER_ERROR_REASON=TooManyCrashes:%MC_SERVER_CRASH_COUNTER%
 	ECHO INFO: Last crash/startup was %MC_SERVER_TMP_FLAG%+ seconds ago 1>>  %~dp0serverstart.log 2>&1
 	ECHO.
@@ -651,9 +714,6 @@ IF %MC_SERVER_CRASH_COUNTER% GEQ %MC_SERVER_MAX_CRASH% (
 	ECHO.
 	>nul TIMEOUT 1
 	ECHO %MC_SERVER_CRASH_COUNTER% Crashes have been counted each within %MC_SERVER_CRASH_TIMER% seconds.
-	>nul TIMEOUT 1
-	ECHO Stopping script...
-	ECHO.
 	>nul TIMEOUT 1
 	GOTO ERROR
 	)
@@ -693,6 +753,9 @@ ECHO DEBUG: MC_SERVER_FORGEVER=%MC_SERVER_FORGEVER% 1>>  %~dp0serverstart.log 2>
 ECHO DEBUG: MC_SERVER_FORGESHORT=%MC_SERVER_FORGESHORT% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_FORGEURL=%MC_SERVER_FORGEURL% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_PACKNAME=%MC_SERVER_PACKNAME% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGEURL=%MC_SERVER_SPONGEURL% 1>>  %~dp0serverstart.log 2>&1
+ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  %~dp0serverstart.log 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  %~dp0serverstart.log 2>&1
@@ -717,6 +780,9 @@ SET MC_SERVER_FORGEVER=
 SET MC_SERVER_FORGESHORT=
 SET MC_SERVER_FORGEURL=
 SET MC_SERVER_SPONGE=
+SET MC_SERVER_PACKNAME=
+SET MC_SERVER_SPONGEURL=
+SET MC_SERVER_SPONGEBOOTSTRAPURL=
 SET MC_SERVER_ERROR_REASON=
 SET MC_SERVER_TMP_FLAG=
 SET MC_SERVER_CRASH_COUNTER=
@@ -725,6 +791,8 @@ SET MC_SERVER_CRASH_HHMMSS=
 
 REM Reset bitsadmin in case things got hung or errored
 bitsadmin /reset 1>>  %~dp0serverstart.log 2>&1
+
+COLOR
 
 :EOF
  
