@@ -117,7 +117,7 @@ re-licensing thereof.
 ____________________________
 ## DISCLAIMERS
 
-"All The Mods Team" is not affiliated with "Curse," "Twitch," "Sponge," "Forge" or any other entity potentially mentioned in this document or relevant source code for this Software. The use of their names and/or trademarks is strictly circumstantial and assumed fair-use. All credit for their respective works, software, branding, copyrights and/or trademarks belongs entirely to them as original owners/licensers.
+"All The Mods Team" is not affiliated with "Mojang," "Oracle," "Curse," "Twitch," "Sponge," "Forge" or any other entity (or entity owning a referenced product) potentially mentioned in this document or relevant source code for this Software. The use of their names and/or trademarks is strictly circumstantial and assumed fair-use. All credit for their respective works, software, branding, copyrights and/or trademarks belongs entirely to them as original owners/licensers.
 
 ```
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
