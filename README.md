@@ -20,8 +20,6 @@
    IF THERE ARE ANY ISSUES
    Please make a report on the github linked above
 
-   Special thanks to all the code Frankensteined from google. There are many sources and references that should have been given credit but were lost in the initial creation. Apologies and thanks all around.
-
 
 # How To Use
 
