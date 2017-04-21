@@ -1,27 +1,26 @@
 # Modpack ServerStart Scripts
 
-Minecraft-Forge Server install/launcher script
+   Minecraft-Forge Server install/launcher script
 
-Created and supported by the All The Mods Team with special thanks to @OrdinatorStouff and @Dijkstra  
+   Created and supported by the All The Mods Team with special thanks to @OrdinatorStouff and @Dijkstra  
 
-GitHub: https://github.com/AllTheMods/Server-Scripts          
-AllTheMods Discord: https://discord.gg/FdFDVWb      
+   GitHub: https://github.com/AllTheMods/Server-Scripts          
+   AllTheMods Discord: https://discord.gg/FdFDVWb      
 
-Originally created for use in "All The Mods" modpacks, but is **free for anyone to use, modify or distribute** provided the conditions of the custom license (detailed below) are met.
+   Originally created for use in "All The Mods" modpacks, but is **free for anyone to use, modify or distribute** provided the conditions of the custom license (detailed below) are met.
 
-# Description
+### Description
 
-These scripts will fetch the appropriate Forge installer and install it. This will also install Mojang's distribution-restricted Minecraft binary and the required libraries.
+   These scripts will fetch the appropriate Forge installer and install it. This will also install Mojang's distribution-restricted Minecraft binary and the required libraries.
 
-After Forge/Minecraft are installed, the same script will act as a launcher to start the server, with an auto-restart-after-crash feature as well.
+   After Forge/Minecraft are installed, the same script will act as a launcher to start the server, with an auto-restart-after-crash feature as well.
 
-All relevant settings are in the easily accessible "settings.cfg" file; Modpack creators can specify their pack's Minecraft and Forge versions, and server operators can specify JVM args and RAM allocation as desired.
+   All relevant settings are in the easily accessible "settings.cfg" file; Modpack creators can specify their pack's Minecraft and Forge versions, and server operators can specify JVM args and RAM allocation as desired.
 
+   IF THERE ARE ANY ISSUES
+   Please make a report on the github linked above
 
-IF THERE ARE ANY ISSUES
-Please make a report on the github linked above
-
-Special thanks to all the code Frankensteined from google. There are many sources and references that should have been given credit but were lost in the initial creation. Apologies and thanks all around.
+   Special thanks to all the code Frankensteined from google. There are many sources and references that should have been given credit but were lost in the initial creation. Apologies and thanks all around.
 
 
 # How To Use
@@ -55,9 +54,9 @@ Formatting is very important for it to load correctly:
 
 \**NOTE: Another debug/bypass options is for modpack creators to package and redistribute the forge installer matching their desired version as long as it's name matches the format: `forge-<MinecraftVersion>-<ForgeVersion>-installer.jar` If included, none will need to be downloaded first.*  
 
-## Optional Java Arguments
+### Optional Java Arguments
 
-Java can be tweaked with launch settings that can sometimes improve the performance of Minecraft over default (no launch options), especially for 1.10+ and larger packs such as All The Mods.
+   Java can be tweaked with launch settings that can sometimes improve the performance of Minecraft over default (no launch options), especially for 1.10+ and larger packs such as All The Mods.
 ______________________________
 **BASIC**  
 These basic settings are recommended for general use for any modpack:
@@ -83,7 +82,7 @@ There are many opinions on what's considered good or not-so-good to use for JVM 
 
 _____________________
 
-## Custom License
+# Custom License
 Based on a combination of the [MIT license](https://opensource.org/licenses/MIT) and Vaskii's [Botania](http://botaniamod.net/license.php)/[Psi](http://psi.vazkii.us/license.php) license:
 ```
 Copyright (c) 2017 All The Mods Team
