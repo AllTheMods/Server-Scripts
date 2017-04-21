@@ -13,7 +13,7 @@
 
    These scripts will fetch the appropriate Forge installer and install it. This will also install Mojang's distribution-restricted Minecraft binary and the required libraries.
 
-   After Forge/Minecraft are installed, the same script will act as a launcher to start the server, with an auto-restart-after-crash feature as well.
+   After Forge/Minecraft are installed, the same script will act as a launcher to start the server, with an auto-restart-after-crash feature as well. (No need for a separate "install" script). It's also adaptable to smoothly transition to new versions of Forge *even on existing servers that have already been setup*. If the installed Forge version is different from what's supplied in the settings.cfg, the script will remove the old Forge and re-download and install the version specified. The script also performs *many* basic checks such as looking for a valid Java version installed and checking that EULA.txt has been updated.
 
    All relevant settings are in the easily accessible "settings.cfg" file; Modpack creators can specify their pack's Minecraft and Forge versions, and server operators can specify JVM args and RAM allocation as desired.
 
@@ -57,13 +57,23 @@ Formatting is very important for it to load correctly:
 ### Optional Java Arguments
 
    Java can be tweaked with launch settings that can sometimes improve the performance of Minecraft over default (no launch options), especially for 1.10+ and larger packs such as All The Mods.
+
+<br>
+<br>
+
+
 ______________________________
 **BASIC**  
 These basic settings are recommended for general use for any modpack:
    ```java
    -server -d64 -Xms1G -XX:+ExplicitGCInvokesConcurrent -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses -XX:+UseConcMarkSweepGC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:UseSSE=3
-   ```  
-   
+   ```    
+
+
+<br>
+<br>
+
+
 ______________________________
 **HIGH RAM**  
 If you have 10G or more RAM allocated to the Minecraft server, then these settings should make better use of the "extra" RAM: 
@@ -74,6 +84,18 @@ If you have 10G or more RAM allocated to the Minecraft server, then these settin
 ______________________________
 There are many opinions on what's considered good or not-so-good to use for JVM args that change from person-to-person, and over time. The settings above were based on [this great discussion/explanation](https://www.reddit.com/r/feedthebeast/comments/5jhuk9/modded_mc_and_memory_usage_a_history_with_a/) by CPW, the lead dev of EnderIO and a prominent contributor to the Forge project.
 
+
+<br>  
+<br>  
+
+
+# Background Story
+Mojang's [Minecraft EULA](https://account.mojang.com/documents/minecraft_eula) is extremely open and forgiving, going so far as to "encourage you to do cool stuff." One of the very few explicit restrictions and "the one major rule" prohibits re-distributing Minecraft or any part of it (including the Minecraft server binary files):
+> "In order to ensure the integrity of the Game, we need all Game downloads and updates to come from an authorized source. It's also important for us that 3rd party tools/services don't seem "official" as we can't guarantee their quality. It's part of the responsibility we have to the customers of Minecraft."
+
+This means that any modpack team/developer that wants to provide users with a *ready-to-use* server file package can't provide all the binaries and therefore would be incomplete. This script bridges that gap by dynamically fetching and installing MinecraftForge. The forge installer conveniently fetches the Minecraft binaries from Mojang's servers as well as the required library files as well provigind a seamless "install" step followed by launching/running the server after initial setup. 
+
+From there we decided we wanted to go all-out providing as many features and configuration options as possible to make setting up and running a server as easy as possible. We want this to be more than just a simple "workaround" to the distribution restriction, but a full-featured option for server operators that don't use a control panel or management software.
 
 
 
