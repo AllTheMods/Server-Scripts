@@ -2,9 +2,7 @@
 
 Minecraft-Forge Server install/launcher script
 
-Created by:   
-    "Ordinator" (mostly Windows version)       
-    "Dijkstra" (mostly Linux version)       
+Created by @OrdinatorStouff, @Dijkstra, and officially supported by the AllTheMods development team.
 
 GitHub: https://github.com/AllTheMods/Server-Scripts          
 AllTheMods Discord: https://discord.gg/FdFDVWb      
@@ -37,8 +35,8 @@ NOTE: The formatting is very important for it to load correctly:
 * Semicolon immediately following value (no spaces)
 
 
-| Setting | Description                | Example Value | 
-| --------|:---------------------------| :------------:|
+| Setting   | Description                | Example Value | 
+| ----------|----------------------------| :------------:|
 | MAX_RAM      | How much max RAM your allowing the JVM to allocate to the server  | `5G` |
 | JAVA_ARGS      | The defaults provided should be best for most people, but can be edited if desired | *See Below* |
 | CRASH_COUNT | The max number of consecutive crashes that each occur withing so many seconds of each other. If max is reaches, the script will exit. This is to stop spamming restarts of a server with a critical issue. | `8` |
