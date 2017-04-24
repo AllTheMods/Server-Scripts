@@ -1,6 +1,6 @@
 
-## Custom License
-Based on a combination of the [MIT license](https://opensource.org/licenses/MIT) and Vaskii's [Botania](http://botaniamod.net/license.php)/[Psi](http://psi.vazkii.us/license.php) license:
+# Custom License
+The *only* reason we included a license is because we wanted it to be **easier** for more people to use/share this. Some places (i.e. Curse) need some form of "official" notice allowing content to be used. Since we were making a license anyway, we thought it would be nice to add an attribution clause so others didn't try to claim our work as their own. The result is this custom license based on a combination of the [MIT license](https://opensource.org/licenses/MIT) and a couple parts from Vaskii's [Botania](http://botaniamod.net/license.php)/[Psi](http://psi.vazkii.us/license.php) license:
 ```
 Copyright (c) 2017 All The Mods Team
 
@@ -27,7 +27,7 @@ redistribution and modification).
 
 The above copyright notice and conditions must be included in all copies or 
 substantial portions of the Software, including derivative works and 
-re-licensing thereof.
+re-licensing thereof. 
 ```
 
 ____________________________
@@ -44,6 +44,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
 
 _______________________________
 
