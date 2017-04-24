@@ -9,6 +9,13 @@
 
    Originally created for use in "All The Mods" modpacks, but is **free for anyone to use, modify or distribute** provided the conditions of the custom license (detailed below) are met.
 
+<br>
+
+<br>
+
+<br>
+
+
 ### Description
 
    These scripts will fetch the appropriate Forge installer and install it. This will also install Mojang's distribution-restricted Minecraft binary and the required libraries.
@@ -19,6 +26,13 @@
 
    IF THERE ARE ANY ISSUES
    Please make a report on the github linked above
+
+
+<br>
+
+<br>
+
+<br>
 
 
 # How To Use
@@ -52,11 +66,17 @@ Formatting is very important for it to load correctly:
 
 \**NOTE: Another debug/bypass options is for modpack creators to package and redistribute the forge installer matching their desired version as long as it's name matches the format: `forge-<MinecraftVersion>-<ForgeVersion>-installer.jar` If included, none will need to be downloaded first.*  
 
-### Optional Java Arguments
+<br>
+
+<br>
+
+<br>
+
+
+## Optional Java Arguments
 
    Java can be tweaked with launch settings that can sometimes improve the performance of Minecraft over default (no launch options), especially for 1.10+ and larger packs such as All The Mods.
 
-<br>
 <br>
 
 
@@ -68,7 +88,6 @@ These basic settings are recommended for general use for any modpack:
    ```    
 
 
-<br>
 <br>
 
 
@@ -83,8 +102,12 @@ ______________________________
 There are many opinions on what's considered good or not-so-good to use for JVM args that change from person-to-person, and over time. The settings above were based on [this great discussion/explanation](https://www.reddit.com/r/feedthebeast/comments/5jhuk9/modded_mc_and_memory_usage_a_history_with_a/) by CPW, the lead dev of EnderIO and a prominent contributor to the Forge project.
 
 
-<br>  
-<br>  
+
+<br>
+
+<br>
+
+<br>
 
 
 # Background Story
@@ -101,6 +124,13 @@ From there we decided we wanted to go all-out providing as many features and con
 
 
 _____________________
+
+<br>
+
+<br>
+
+<br>
+
 
 # Custom License
 The *only* reason we included a license is because we wanted it to be **easier** for more people to use/share this. Some places (i.e. Curse) need some form of "official" notice allowing content to be used. Since we were making a license anyway, we thought it would be nice to add an attribution clause so others didn't try to claim our work as their own. The result is this custom license based on a combination of the [MIT license](https://opensource.org/licenses/MIT) and a couple parts from Vaskii's [Botania](http://botaniamod.net/license.php)/[Psi](http://psi.vazkii.us/license.php) license:
