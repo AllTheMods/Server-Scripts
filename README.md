@@ -37,9 +37,9 @@ Formatting is very important for it to load correctly:
 
 | Setting   | Description                | Example Value | 
 | ----------|----------------------------| :------------:|
-| **MAX_RAM**      | How much max RAM your allowing the JVM to allocate to the server  | `5G` |
+| **MAX_RAM**      | How much max RAM to allow the JVM to allocate to the server  | `5G` |
 | **JAVA_ARGS**      | The defaults provided should be best for most people, but can be edited if desired | *See Below* |
-| **CRASH_COUNT** | The max number of consecutive crashes that each occur withing so many seconds of each other. If max is reaches, the script will exit. This is to stop spamming restarts of a server with a critical issue. | `8` |
+| **CRASH_COUNT** | The max number of consecutive crashes that each occur within so many seconds of each other. If max is reaches, the script will exit. This is to stop spamming restarts of a server with a critical issue. | `8` |
 | **CRASH_TIMER** | The number of seconds to consider a crash within to be "consecutive" | `600` |
 | **RUN_FROM_BAD_FOLDER** | The scripts will not run from "temp" folders or "system" folders. If you want to force allow this, change the value to `1` | `0` | 
 | **IGNORE_OFFLINE** | The scripts will not run if a connection to the internet can not be found. If you want to force allow (i.e. to run a server for local/LAN only) then set to `1`. Note, however that it will need internet connection to at least perform initial download/install of the Forge binaries | `0` |
@@ -130,7 +130,7 @@ redistribution and modification).
 
 The above copyright notice and conditions must be included in all copies or 
 substantial portions of the Software, including derivative works and 
-re-licensing thereof.
+re-licensing thereof. 
 ```
 
 ____________________________
