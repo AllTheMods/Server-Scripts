@@ -17,6 +17,7 @@
 
 
 ### Description
+#### OS Batch/Script to help install/run modpack servers. Available for Windows and Linux (Bash). 
 
    These scripts will fetch the appropriate Forge installer and install it. This will also install Mojang's distribution-restricted Minecraft binary and the required libraries.
 
