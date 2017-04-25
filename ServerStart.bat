@@ -14,6 +14,68 @@
 
 :::: *** THIS FILE NOT INTENDED TO BE EDITED, USE "settings.cfg" INSTEAD ***
 
+::================================================================================::
+::*** LICENSE ***::
+
+:: The only reason we included a license is because we wanted it to be easier 
+:: for more people to use/share this. Some places (i.e. Curse) need some form of 
+:: "official" notice allowing content to be used. Since we were making a license 
+:: anyway, we thought it would be nice to add an attribution clause so others 
+:: didn't try to claim our work as their own. The result is this custom license 
+:: based on a combination of the MIT license and a couple parts from Vaskii's 
+:: Botania/Psi license:
+
+	:: Copyright (c) 2017 All The Mods Team
+
+	:: Permission is hereby granted, free of charge, to any person obtaining a copy
+	:: of this software and associated documentation files (the "Software"), to deal
+	:: in the Software without restriction, including without limitation the rights
+	:: to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	:: copies of the Software, and to permit persons to whom the Software is
+	:: furnished to do so, subject to the following conditions:
+
+	:: You must give appropriate credit to the "All The Mods Team" as original 
+	:: creators for any parts of this Software being used. A link back to original 
+	:: content is optional but would be greatly appreciated. 
+
+	:: It is forbidden to charge for access to the distribution of this Software or 
+	:: gain money through it. This includes any type of inline advertisement, such 
+	:: as url shorteners (adf.ly or otherwise) or ads. This also includes 
+	:: restricting any amount of access behind a paywall. Special permission is 
+	:: given to allow this Software to be bundled or distributed with projects on 
+	:: Curse.com, CurseForge.com or their related sub-domains and subsidiaries.
+
+	:: Derivative works must be open source (have its source visible and allow for 
+	:: redistribution and modification).
+
+	:: The above copyright notice and conditions must be included in all copies or 
+	:: substantial portions of the Software, including derivative works and 
+	:: re-licensing thereof. 
+
+::================================================================================::
+::*** DISCLAIMERS ***::
+
+	:: "All The Mods Team" is not affiliated with "Mojang," "Oracle," 
+	:: "Curse," "Twitch," "Sponge," "Forge" or any other entity (or entity owning a 
+	:: referenced product) potentially mentioned in this document or relevant source 
+	:: code for this Software. The use of their names and/or trademarks is strictly 
+	:: circumstantial and assumed fair-use. All credit for their respective works, 
+	:: software, branding, copyrights and/or trademarks belongs entirely to them as 
+	:: original owners/licensers.
+
+	:: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	:: IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	:: FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	:: AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	:: LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	:: OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	:: SOFTWARE.
+
+
+
+:::: *** THIS FILE NOT INTENDED TO BE EDITED, USE "settings.cfg" INSTEAD ***
+
+
 SETLOCAL
 REM Internal Scripty stuff
 REM default an error code in case error block is ran without this var being defined first
@@ -83,6 +145,11 @@ ECHO. 1>>  "%~dp0serverstart.log" 2>&1
 	GOTO ERROR
 	)	
 
+>nul FIND /I "IGNORE_JAVA_CHECK=" "%~dp0settings.cfg" || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:IGNORE_JAVA_CHECK
+	GOTO ERROR
+	)	
+	
 >nul FIND /I "MCVER=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:MCVER
 	GOTO ERROR
@@ -109,6 +176,7 @@ SET MC_SERVER_MAX_CRASH=%CRASH_COUNT%
 SET MC_SERVER_CRASH_TIMER=%CRASH_TIMER%
 SET MC_SERVER_RUN_FROM_BAD_FOLDER=%RUN_FROM_BAD_FOLDER%
 SET MC_SERVER_IGNORE_OFFLINE=%IGNORE_OFFLINE%
+SET MC_SERVER_IGNORE_JAVA=%IGNORE_JAVA_CHECK%
 SET MC_SERVER_MCVER=%MCVER%
 SET MC_SERVER_FORGEVER=%FORGEVER%
 SET MC_SERVER_FORGEURL=%FORGEURL%
@@ -201,6 +269,12 @@ IF %ERRORLEVEL% EQU 0 (
 )
 
 :JAVAERROR
+IF NOT %MC_SERVER_IGNORE_JAVA% EQU 0 (
+	ECHO WARN: Skipping validation of proper Java install/version...
+	ECHO IF Java is not installed, too old, or not 64-bit, the server probably won't start/run correctly
+	ECHO WARN: Skipping validation of Java install... 1>>  "%~dp0serverstart.log" 2>&1
+	GOTO CHECKFOLDER
+)
 COLOR CF
 ECHO ERROR: Could not find 64-bit Java 1.8 or 1.9 installed or in PATH 1>> "%~dp0serverstart.log" 2>&1
 SET MC_SERVER_ERROR_REASON="JavaVersionOrPathError"
@@ -208,7 +282,7 @@ CLS
 ECHO.
 ECHO ERROR: Could not find valid java version installed. 
 >nul TIMEOUT 1
-ECHO 64-bit Java ver 1.8+ is required. Check here for latest downloads:
+ECHO 64-bit Java ver 1.8+ is highly recomended. Check here for latest downloads:
 ECHO https://java.com/en/download/manual.jsp
 ECHO.
 >nul TIMEOUT 1
@@ -226,7 +300,7 @@ ECHO INFO: Checking if current folder is valid... 1>>  "%~dp0serverstart.log" 2>
 REM Check if current directory is in ProgramFiles
 IF NOT DEFINED ProgramFiles ( GOTO CHECKPROG86 )
 ECHO.x%CD%x | FINDSTR /I /C:"%ProgramFiles%" >nul
-ECHO Error Level: %ERRORLEVEL%
+REM ECHO Error Level: %ERRORLEVEL%
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-ProgramFiles;
 	GOTO FOLDERERROR
@@ -412,12 +486,12 @@ ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INF
 ATTRIB -R "%MC_SERVER_FORGE_JAR%"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INFO: No Forge Jar present to UN-read-only 1>> "%~dp0serverstart.log" 2>&1
 
 :STARTSERVER
-COLOR
 TITLE %MC_SERVER_PACKNAME% Server Running
 ECHO.
 ECHO.
 ECHO Starting %MC_SERVER_PACKNAME% Server...
 ECHO INFO: Starting Server... 1>>  "%~dp0serverstart.log" 2>&1
+COLOR 
 
 REM Batch will wait here indefinetly while MC server is running
 IF %MC_SERVER_SPONGE% EQU 1 (
