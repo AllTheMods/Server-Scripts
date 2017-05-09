@@ -40,6 +40,9 @@
 
 #### Do not modify `ServerStart.bat` or `ServerStart.sh`
 #### All settings are modified in `settings.cfg` instead.
+
+Windows: **`ServerStart.Bat`** *(Run/Double-Click)*  
+Linux: **`bash ServerStart.sh`** *(must be bash, not shell/sh)*
 ________________   
 
 ### settings.cfg   
