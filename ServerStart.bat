@@ -385,7 +385,7 @@ ECHO Checking for basic internet connectivity...
 ECHO INFO: Checking for basic internet connectivity... 1>>  "%~dp0serverstart.log" 2>&1
 
 REM Try with Google DNS
-PING -n 2 -w 1000 8.8.8.8 | find "bytes="  1>>  "%~dp0serverstart.log" 2>&1
+PING -n 2 -w 1000 8.8.8.8 | find "TTL="  1>>  "%~dp0serverstart.log" 2>&1
 IF %ERRORLEVEL% EQU 0 (
     SET MC_SERVER_TMP_FLAG=0
 	ECHO INFO: Ping of "8.8.8.8" Successfull 1>>  "%~dp0serverstart.log" 2>&1
@@ -396,7 +396,7 @@ IF %ERRORLEVEL% EQU 0 (
 
 REM If Google ping failed try one more time with L3 just in case
 IF MC_SERVER_TMP_FLAG EQU 1 (
-	PING -n 2 -w 1000 4.2.2.1 | find "bytes="  1>>  "%~dp0serverstart.log" 2>&1
+	PING -n 2 -w 1000 4.2.2.1 | find "TTL="  1>>  "%~dp0serverstart.log" 2>&1
 	IF %ERRORLEVEL% EQU 0 (
 		SET MC_SERVER_TMP_FLAG=0
 		INFO: Ping of "4.4.2.1" Successfull 1>>  "%~dp0serverstart.log" 2>&1
@@ -540,8 +540,14 @@ IF EXIST "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" (
 	GOTO RUNINSTALLER
 )
 
+IF NOT %MC_SERVER_IGNORE_OFFLINE% EQU 0 (
+	ECHO Skipping forge server online check...
+	ECHO WARN: Skipping forge server online check... 1>>  "%~dp0serverstart.log" 2>&1
+	GOTO FORGEFILEPREP
+)
+
 REM Ping minecraftforge before attempting download
-PING -n 2 -w 1000 minecraftforge.net | find "bytes="  1>> "%~dp0serverstart.log" 2>&1
+PING -n 2 -w 1000 minecraftforge.net | find "TTL="  1>> "%~dp0serverstart.log" 2>&1
 IF %ERRORLEVEL% EQU 0 (
 	ECHO INFO: Ping of "minecraftforge.net" Successfull 1>>  "%~dp0serverstart.log" 2>&1
 ) ELSE (
@@ -551,6 +557,7 @@ IF %ERRORLEVEL% EQU 0 (
 	GOTO ERROR
 )
 
+:FORGEFILEPREP
 DEL /F /Q "%~dp0*forge*.html"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INFO: No forge-index to delete 1>>  "%~dp0serverstart.log" 2>&1
 DEL /F /Q "%~dp0*forge*universal*"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INFO: No forge-universal to delete 1>>  "%~dp0serverstart.log" 2>&1
 DEL /F /Q "%~dp0*tmp-forgeinstaller.jar" 1>> "%~dp0serverstart.log" 2>&1 || ECHO INFO: No forge-installer to delete 1>> "%~dp0serverstart.log" 2>&1
