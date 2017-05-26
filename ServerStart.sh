@@ -105,9 +105,6 @@ install_server(){
 		echo "Deleting Forge installer (no longer needed)"
 		echo "INFO: Deleting installer.jar" >>serverstart.log 2>&1
 		rm -rf installer.jar  >>serverstart.log 2>&1
-		echo "Renaming forge JAR to ${FORGE_JAR}"
-		echo "DEBUG: Renaming forge-${MCVER}-${FORGEVER}-universal.jar to ${FORGE_JAR}" >>serverstart.log 2>&1
-		mv forge-*-*-universal.jar ${FORGE_JAR} >>serverstart.log 2>&1
 	fi
 }
 
@@ -117,7 +114,7 @@ start_server() {
 	echo ""
 	echo "Starting server"
 	echo "INFO: Starting Server at " $(date -u +%Y-%m-%d_%H:%M:%S) >>serverstart.log 2>&1
-	java -Xmx${MAX_RAM} ${JAVA_ARGS} -jar ${FORGE_JAR} nogui
+	java -Xmx${MAX_RAM} ${JAVA_ARGS} -jar forge-${MCVER}-${FORGEVER}-universal.jar nogui
 }
 
 # routine for basic directory checks
@@ -200,7 +197,7 @@ read_config(){
    			if [[ ${str:0:1} != "#" ]] ; then
       			name=$(echo "$line" | cut -d '=' -f 1)
       			val=$(echo "${line}" | cut -d '=' -f 2-)
-      			eval "export ${name}='${val}'"
+      			eval "export ${name}='${val::-1}'"
       		fi
    		fi
 	done < settings.cfg 
@@ -231,7 +228,6 @@ read_config
 echo "INFO: Starting script at" $(date -u +%Y-%m-%d_%H:%M:%S) >serverstart.log 2>&1
 echo "DEBUG: Dumping starting variables: " >>serverstart.log 2>&1
 echo "DEBUG: MAX_RAM=$MAX_RAM" >>serverstart.log 2>&1
-echo "DEBUG: FORGE_JAR=$FORGE_JAR" >>serverstart.log 2>&1
 echo "DEBUG: JAVA_ARGS=$JAVA_ARGS" >>serverstart.log 2>&1
 echo "DEBUG: CRASH_COUNT=$CRASH_COUNT" >>serverstart.log 2>&1
 echo "DEBUG: RUN_FROM_BAD_FOLDER=$RUN_FROM_BAD_FOLDER" >>serverstart.log 2>&1
