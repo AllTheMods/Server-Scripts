@@ -276,7 +276,7 @@ while true ; do
 	export answer="y"
 	echo "Server will restart in ~10 seconds. No input needed..."
 	read -t 12 -p "Restart now (y) or exit to shell (n)?  " answer
-	if [[ "$answer" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+	if [[ "$answer" =~ ^([nN][oO]|[nN])+$ ]]; then
 		echo "INFO: User cancelled restart; exiting to shell" >>serverstart.log 2>&1
 		exit 0
 	fi
