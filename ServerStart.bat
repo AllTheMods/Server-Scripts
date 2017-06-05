@@ -486,6 +486,8 @@ ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INF
 ATTRIB -R "%MC_SERVER_FORGE_JAR%"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INFO: No Forge Jar present to UN-read-only 1>> "%~dp0serverstart.log" 2>&1
 
 :STARTSERVER
+COLOR 
+CLS 
 TITLE %MC_SERVER_PACKNAME% Server Running
 ECHO.
 ECHO.
@@ -497,13 +499,15 @@ REM Batch will wait here indefinetly while MC server is running
 IF %MC_SERVER_SPONGE% EQU 1 (
 	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ]
 	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ] 1>> "%~dp0serverstart.log" 2>&1
+	COLOR 
 	java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui
 ) ELSE (
 	ECHO DEBUG: Disabling any spongeforge jar in \mods\ because USE_SPONGE is disabled in settings.cfg 1>> "%~dp0serverstart.log" 2>&1
 	(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0mods\*spongeforge*.jar" /B /O:-D') DO MOVE /Y "%~dp0mods\%%x" "%%x.disabled") 1>> "%~dp0serverstart.log" 2>&1
-	java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
 	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ]
 	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ] 1>> "%~dp0serverstart.log" 2>&1
+	COLOR 
+	java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
 )
 
 REM If server is exited or crashes, restart...
