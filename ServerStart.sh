@@ -26,32 +26,10 @@
 #### or come find us on Discord: https://discord.gg/FdFDVWb
 ####
 
+
 #For Server Owners
 
-	# RAM to allocate to server
-	export MAX_RAM="5G"
-
-	# Filename for forge jar (needed by some hosts)
-	export FORGE_JAR="forge.jar"
-
-	# Server's JVM start args
-	export JAVA_ARGS="-XX:+ExplicitGCInvokesConcurrent -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=250 -XX:UseSSE=3"
-
-	# Max server crashes (1hr apart or less) to stop auto-restart (10 default)
-	export CRASH_COUNT=10
-
-	# Allow script to run in TMP or directories with no R/W access (0 default)
-	export RUN_FROM_BAD_FOLDER=0
-
-	# Skip internet connectivity [ping] check (default 0)
-	export IGNORE_OFFLINE=0
-
-# For Modpack Developers
-# (Do not modify unless you know what you're doing)
-
-	export MCVER="1.10.2"
-	export FORGEVER="12.18.3.2221"
-	export FORGEURL="DISABLE"
+	
 #
 #
 #
@@ -90,7 +68,7 @@ install_server(){
 		else
 			export URL="${FORGEURL}"
 		fi
-
+		echo $URL
 		which wget >> /dev/null
 		if [ $? -eq 0 ]; then
 			echo "DEBUG: (wget) Downloading ${URL}" >>serverstart.log 2>&1
@@ -127,9 +105,6 @@ install_server(){
 		echo "Deleting Forge installer (no longer needed)"
 		echo "INFO: Deleting installer.jar" >>serverstart.log 2>&1
 		rm -rf installer.jar  >>serverstart.log 2>&1
-		echo "Renaming forge JAR to ${FORGE_JAR}"
-		echo "DEBUG: Renaming forge-${MCVER}-${FORGEVER}-universal.jar to ${FORGE_JAR}" >>serverstart.log 2>&1
-		mv "forge-${MCVER}-${FORGEVER}-universal.jar" ${FORGE_JAR} >>serverstart.log 2>&1
 	fi
 }
 
@@ -139,7 +114,7 @@ start_server() {
 	echo ""
 	echo "Starting server"
 	echo "INFO: Starting Server at " $(date -u +%Y-%m-%d_%H:%M:%S) >>serverstart.log 2>&1
-	java -Xmx${MAX_RAM} ${JAVA_ARGS} -jar ${FORGE_JAR} nogui
+	java -Xmx${MAX_RAM} ${JAVA_ARGS} -jar forge-${MCVER}-${FORGEVER}-universal.jar nogui
 }
 
 # routine for basic directory checks
@@ -216,13 +191,43 @@ check_binaries(){
 	fi
 }
 
+read_config(){
+	while read -r line || [[ -n "$line" ]] ; do
+   		if echo $line | grep -F = &>/dev/null; then
+   			if [[ ${str:0:1} != "#" ]] ; then
+      			name=$(echo "$line" | cut -d '=' -f 1)
+      			val=$(echo "${line}" | cut -d '=' -f 2-)
+      			eval "export ${name}='${val::-1}'"
+      		fi
+   		fi
+	done < settings.cfg 
+
+}
+
+eula(){
+	if [ ! -f eula.txt ]; then
+		echo "Could not find eula.txt starting server to generate it"
+		start_server
+		echo ""
+		echo "Closing to give user a change to accept the eula"
+		exit 0
+	else
+		if grep -Fxq "eula=false" eula.txt; then
+			echo "Could not find 'eula=true' in 'eula.txt'"
+			echo "Closing to give user a change to accept the eula"
+			exit 0
+		fi
+	fi
+}
+
+read_config
+
 # Script/batch starts here...
 
 # init log file and dump basic info
 echo "INFO: Starting script at" $(date -u +%Y-%m-%d_%H:%M:%S) >serverstart.log 2>&1
 echo "DEBUG: Dumping starting variables: " >>serverstart.log 2>&1
-echo "DEBUG: MAX_RAM=${MAX_RAM}" >>serverstart.log 2>&1
-echo "DEBUG: FORGE_JAR=$FORGE_JAR" >>serverstart.log 2>&1
+echo "DEBUG: MAX_RAM=$MAX_RAM" >>serverstart.log 2>&1
 echo "DEBUG: JAVA_ARGS=$JAVA_ARGS" >>serverstart.log 2>&1
 echo "DEBUG: CRASH_COUNT=$CRASH_COUNT" >>serverstart.log 2>&1
 echo "DEBUG: RUN_FROM_BAD_FOLDER=$RUN_FROM_BAD_FOLDER" >>serverstart.log 2>&1
@@ -248,6 +253,7 @@ fi
 check_dir
 check_connection
 check_binaries
+eula
 
 # loop to restart server and check crash frequency
 a=0
@@ -276,7 +282,7 @@ while true ; do
 	export answer="y"
 	echo "Server will restart in ~10 seconds. No input needed..."
 	read -t 12 -p "Restart now (y) or exit to shell (n)?  " answer
-	if [[ "$answer" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+	if [[ "$answer" =~ ^([nN][oO]|[nN])+$ ]]; then
 		echo "INFO: User cancelled restart; exiting to shell" >>serverstart.log 2>&1
 		exit 0
 	fi
@@ -285,6 +291,7 @@ while true ; do
 	check_dir
 	check_connection
 	check_binaries
+	eula
 	echo "INFO: Server-auto-restart commencing"  >>serverstart.log 2>&1
 	echo "Rebooting now!"
 done
