@@ -486,14 +486,13 @@ ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INF
 ATTRIB -R "%MC_SERVER_FORGE_JAR%"  1>> "%~dp0serverstart.log" 2>&1 || ECHO INFO: No Forge Jar present to UN-read-only 1>> "%~dp0serverstart.log" 2>&1
 
 :STARTSERVER
-COLOR 
 CLS 
 TITLE %MC_SERVER_PACKNAME% Server Running
 ECHO.
 ECHO.
 ECHO Starting %MC_SERVER_PACKNAME% Server...
 ECHO INFO: Starting Server... 1>>  "%~dp0serverstart.log" 2>&1
-COLOR 
+COLOR 07
 
 REM Batch will wait here indefinetly while MC server is running
 IF %MC_SERVER_SPONGE% EQU 1 (
