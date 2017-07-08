@@ -455,8 +455,8 @@ IF %MC_SERVER_SPONGE% EQU 1 (
 		MKDIR "%~dp0mods" 1>>  "%~dp0serverstart.log" 2>&1
 	)
 	REM Check for spongeforge jar in /mods/
-	IF NOT EXIST "%~dp0mods/*spongeforge*%MC_SERVER_MCVER%*%MC_SERVER_FORGESHORT%*.jar" (
-		ECHO SpongeForge JAR for Forge %MC_SERVER_FORGESHORT% not found in "mods" folder...
+	IF NOT EXIST "%~dp0mods/*spongeforge*%MC_SERVER_MCVER%*.jar" (
+		ECHO SpongeForge JAR for not found in "mods" folder...
 		ECHO INFO: SpongeForge JAR not found in "mods" folder  1>>  "%~dp0serverstart.log" 2>&1
 		GOTO DOWNLOADSPONGE
 	)
