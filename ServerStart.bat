@@ -78,6 +78,8 @@
 
 SETLOCAL
 REM Internal Scripty stuff
+REM Define system root so we can run CORRECT version of things (like FIND)
+SET MC_SYS32=%SYSTEMROOT%\SYSTEM32
 REM default an error code in case error block is ran without this var being defined first
 SET MC_SERVER_ERROR_REASON=Unspecified
 REM this is a temp variable to use for intermidiate calculations and such
@@ -87,6 +89,7 @@ SET MC_SERVER_CRASH_COUNTER=1
 REM set "crash time" to initial script start 
 SET MC_SERVER_CRASH_YYYYMMDD=%date:~10,4%%date:~4,2%%date:~7,2%
 SET MC_SERVER_CRASH_HHMMSS=%time:~0,2%%time:~3,2%%time:~6,2%
+
 
 REM delete log if already exists to start a fresh one
 IF EXIST "%~dp0serverstart.log" DEL /F /Q "%~dp0serverstart.log"
@@ -115,52 +118,52 @@ ECHO DEBUG: settings.cfg Found. Logging full contents below: 1>>  "%~dp0serverst
 >nul COPY "%~dp0serverstart.log"+"%~dp0settings.cfg" "%~dp0serverstart.log"
 ECHO. 1>>  "%~dp0serverstart.log" 2>&1
 
->nul FIND /I "MAX_RAM=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "MAX_RAM=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:MAX_RAM
 	GOTO ERROR
 	)
 
->nul FIND /I "JAVA_ARGS=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "JAVA_ARGS=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:JAVA_ARGS
 	GOTO ERROR
 	)
 
->nul FIND /I "CRASH_COUNT=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "CRASH_COUNT=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:CRASH_COUNT
 	GOTO ERROR
 	)
 
->nul FIND /I "CRASH_TIMER=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "CRASH_TIMER=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:CRASH_TIMER
 	GOTO ERROR
 	)
 	
->nul FIND /I "RUN_FROM_BAD_FOLDER=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "RUN_FROM_BAD_FOLDER=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:RUN_FROM_BAD_FOLDER
 	GOTO ERROR
 	)
 	
->nul FIND /I "IGNORE_OFFLINE=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "IGNORE_OFFLINE=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:IGNORE_OFFLINE
 	GOTO ERROR
 	)	
 
->nul FIND /I "IGNORE_JAVA_CHECK=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "IGNORE_JAVA_CHECK=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:IGNORE_JAVA_CHECK
 	GOTO ERROR
 	)	
 	
->nul FIND /I "MCVER=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "MCVER=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:MCVER
 	GOTO ERROR
 	)	
 
->nul FIND /I "FORGEVER=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "FORGEVER=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:FORGEVER
 	GOTO ERROR
 	)	
 
->nul FIND /I "FORGEURL=" "%~dp0settings.cfg" || (
+>nul %MC_SYS32%\FIND.EXE /I "FORGEURL=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:FORGEURL
 	GOTO ERROR
 	)		
@@ -254,13 +257,13 @@ ECHO INFO: Checking java installation...
 ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  "%~dp0serverstart.log" 2>&1
 java -d64 -version || GOTO JAVAERROR 1>>  "%~dp0serverstart.log" 2>&1
 
-java -d64 -version 2>&1 | FIND "1.8"  1>>  "%~dp0serverstart.log" 2>&1
+java -d64 -version 2>&1 | %MC_SYS32%\FIND.EXE "1.8"  1>>  "%~dp0serverstart.log" 2>&1
 IF %ERRORLEVEL% EQU 0 (
 	ECHO INFO: Found 64-bit Java 1.8 1>> "%~dp0serverstart.log" 2>&1
 	ECHO ...64-bit Java 1.8 found! 1>> "%~dp0serverstart.log" 2>&1
 	GOTO CHECKFOLDER
 ) ELSE (
-    java -d64 -version 2>&1 | FIND "1.9"  1>>  "%~dp0serverstart.log" 2>&1
+    java -d64 -version 2>&1 | %MC_SYS32%\FIND.EXE "1.9"  1>>  "%~dp0serverstart.log" 2>&1
 	IF %ERRORLEVEL% EQU 0 (
 		ECHO INFO: Found 64-bit Java 1.9 1>> "%~dp0serverstart.log" 2>&1
 		ECHO ...64-bit Java 1.9 found!
@@ -299,13 +302,13 @@ ECHO INFO: Checking if current folder is valid... 1>>  "%~dp0serverstart.log" 2>
 
 REM Check if current directory is in ProgramFiles
 IF NOT DEFINED ProgramFiles ( GOTO CHECKPROG86 )
-ECHO.x%CD%x | FINDSTR /I /C:"%ProgramFiles%" >nul
+ECHO.x%CD%x | %MC_SYS32%\FINDSTR.EXE /I /C:"%ProgramFiles%" >nul
 REM ECHO Error Level: %ERRORLEVEL%
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-ProgramFiles;
 	GOTO FOLDERERROR
 )
-ECHO.x%~dp0x | FINDSTR /I /C:"%ProgramFiles%" >nul
+ECHO.x%~dp0x | %MC_SYS32%\FINDSTR.EXE /I /C:"%ProgramFiles%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-ProgramFiles;
 	GOTO FOLDERERROR
@@ -313,12 +316,12 @@ IF %ERRORLEVEL% EQU 0 (
 	
 :CHECKPROG86
 IF NOT DEFINED ProgramFiles^(x86^) ( GOTO CHECKSYS )
-ECHO.x%CD%x | FINDSTR /I /C:"%ProgramFiles(x86)%" >nul
+ECHO.x%CD%x | %MC_SYS32%\FINDSTR.EXE /I /C:"%ProgramFiles(x86)%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-ProgramFiles86;
 	GOTO FOLDERERROR
 )
-ECHO.x%~dp0x | FINDSTR /I /C:"%ProgramFiles(x86)%" >nul
+ECHO.x%~dp0x | %MC_SYS32%\FINDSTR.EXE /I /C:"%ProgramFiles(x86)%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-ProgramFiles86;
 	GOTO FOLDERERROR
@@ -327,12 +330,12 @@ IF %ERRORLEVEL% EQU 0 (
 :CHECKSYS
 REM Check if current directory is in SystemRoot
 IF NOT DEFINED SystemRoot ( GOTO CHECKTEMP )
-ECHO.x%CD%x | FINDSTR /I /C:"%SystemRoot%" >nul
+ECHO.x%CD%x | %MC_SYS32%\FINDSTR.EXE /I /C:"%SystemRoot%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-System;
 	GOTO FOLDERERROR
 )
-ECHO.x%~dp0x | FINDSTR /I /C:"%SystemRoot%" >nul
+ECHO.x%~dp0x | %MC_SYS32%\FINDSTR.EXE /I /C:"%SystemRoot%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-System;
 	GOTO FOLDERERROR
@@ -341,12 +344,12 @@ IF %ERRORLEVEL% EQU 0 (
 :CHECKTEMP
 REM Check if current directory is in TEMP
 IF NOT DEFINED TEMP ( GOTO CHECKTMP )
-ECHO.x%CD%x | FINDSTR /I /C:"%TEMP%" >nul
+ECHO.x%CD%x | %MC_SYS32%\FINDSTR.EXE /I /C:"%TEMP%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-Temp;
 	GOTO FOLDERERROR
 )
-ECHO.x%~dp0x | FINDSTR /I /C:"%TEMP%" >nul
+ECHO.x%~dp0x | %MC_SYS32%\FINDSTR.EXE /I /C:"%TEMP%" >nul
 IF %ERRORLEVEL% EQU 0 (
 	SET MC_SERVER_ERROR_REASON=BadFolder-Temp;
 	GOTO FOLDERERROR
@@ -354,12 +357,12 @@ IF %ERRORLEVEL% EQU 0 (
 
 :CHECKTMP
 IF NOT DEFINED TMP ( GOTO CHECKONLINE )
-	ECHO.x%CD%x | FINDSTR /I /C:"%TMP%" >nul
+	ECHO.x%CD%x | %MC_SYS32%\FINDSTR.EXE /I /C:"%TMP%" >nul
 	IF %ERRORLEVEL% EQU 0 (
 		SET MC_SERVER_ERROR_REASON=BadFolder-Temp;
 		GOTO FOLDERERROR
 	)
-	ECHO.x%~dp0x | FINDSTR /I /C:"%TMP%" >nul
+	ECHO.x%~dp0x | %MC_SYS32%\FINDSTR.EXE /I /C:"%TMP%" >nul
 	IF %ERRORLEVEL% EQU 0 (
 		SET MC_SERVER_ERROR_REASON=BadFolder-Temp;
 		GOTO FOLDERERROR
@@ -385,7 +388,7 @@ ECHO Checking for basic internet connectivity...
 ECHO INFO: Checking for basic internet connectivity... 1>>  "%~dp0serverstart.log" 2>&1
 
 REM Try with Google DNS
-PING -n 2 -w 1000 8.8.8.8 | find "TTL="  1>>  "%~dp0serverstart.log" 2>&1
+%MC_SYS32%\PING.EXE -n 2 -w 1000 8.8.8.8 | %MC_SYS32%\FIND.EXE "TTL="  1>>  "%~dp0serverstart.log" 2>&1
 IF %ERRORLEVEL% EQU 0 (
     SET MC_SERVER_TMP_FLAG=0
 	ECHO INFO: Ping of "8.8.8.8" Successfull 1>>  "%~dp0serverstart.log" 2>&1
@@ -396,7 +399,7 @@ IF %ERRORLEVEL% EQU 0 (
 
 REM If Google ping failed try one more time with L3 just in case
 IF MC_SERVER_TMP_FLAG EQU 1 (
-	PING -n 2 -w 1000 4.2.2.1 | find "TTL="  1>>  "%~dp0serverstart.log" 2>&1
+	%MC_SYS32%\PING.EXE -n 2 -w 1000 4.2.2.1 | %MC_SYS32%\FIND.EXE "TTL="  1>>  "%~dp0serverstart.log" 2>&1
 	IF %ERRORLEVEL% EQU 0 (
 		SET MC_SERVER_TMP_FLAG=0
 		INFO: Ping of "4.4.2.1" Successfull 1>>  "%~dp0serverstart.log" 2>&1
@@ -522,7 +525,7 @@ ECHO Clearing old files before installing forge/minecraft...
 ECHO INFO: Clearing and installing forge/minecraft... 1>>  "%~dp0serverstart.log" 2>&1
 
 REM Just in case there's anything pending or dupe-named before starting...
-bitsadmin /reset 1>>  "%~dp0serverstart.log" 2>&1
+%MC_SYS32%\bitsadmin.exe /reset 1>>  "%~dp0serverstart.log" 2>&1
 
 (FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0*forge*%MC_SERVER_MCVER%*%MC_SERVER_FORGEVER%*installer.jar" /B /O:-D') DO SET "MC_SERVER_TMP_FLAG=%%x" & GOTO INSTALL1) 1>> "%~dp0serverstart.log" 2>&1
 
@@ -550,7 +553,7 @@ IF NOT %MC_SERVER_IGNORE_OFFLINE% EQU 0 (
 )
 
 REM Ping minecraftforge before attempting download
-PING -n 2 -w 1000 minecraftforge.net | find "TTL="  1>> "%~dp0serverstart.log" 2>&1
+%MC_SYS32%\PING.EXE -n 2 -w 1000 minecraftforge.net | %MC_SYS32%\FIND.EXE "TTL="  1>> "%~dp0serverstart.log" 2>&1
 IF %ERRORLEVEL% EQU 0 (
 	ECHO INFO: Ping of "minecraftforge.net" Successfull 1>>  "%~dp0serverstart.log" 2>&1
 ) ELSE (
@@ -582,7 +585,7 @@ SET MC_SERVER_TMP_FLAG=0
 :FETCHHTML
 REM Download Forge Download Index HTML to parse the URL for the direct download
 ECHO INFO: Fetching index html from forge ^( https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html ^) 1>>  "%~dp0serverstart.log" 2>&1
-bitsadmin /rawreturn /nowrap /transfer dlforgehtml /download /priority FOREGROUND "https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html" "%~dp0forge-%MC_SERVER_MCVER%.html"  1>> "%~dp0serverstart.log" 2>&1
+%MC_SYS32%\bitsadmin.exe /rawreturn /nowrap /transfer dlforgehtml /download /priority FOREGROUND "https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_%MC_SERVER_MCVER%.html" "%~dp0forge-%MC_SERVER_MCVER%.html"  1>> "%~dp0serverstart.log" 2>&1
 
 IF NOT EXIST "%~dp0forge-%MC_SERVER_MCVER%.html" (
 	IF "%MC_SERVER_TMP_FLAG%"=="0" (
@@ -613,7 +616,7 @@ REM 	)
 REM )
 
 REM More complex wannabe-regex (aka magic)
-FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('findstr /ir "http:\/\/files.*%MC_SERVER_FORGEVER%.*installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G & GOTO FETCHHTML1
+FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('%MC_SYS32%\FINDSTR.EXE /ir "http:\/\/files.*%MC_SERVER_FORGEVER%.*installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G & GOTO FETCHHTML1
 
 :FETCHHTML1
 IF "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
@@ -633,7 +636,7 @@ SET MC_SERVER_TMP_FLAG=0
 :DOWNLOADINSTALLER
 REM Attempt to download installer to a temp download
 ECHO DEBUG: Attempting to download "%MC_SERVER_FORGEURL%" 1>> "%~dp0serverstart.log" 2>&1
-bitsadmin /rawreturn /nowrap /transfer dlforgeinstaller /download /priority FOREGROUND %MC_SERVER_FORGEURL% "%~dp0tmp-forgeinstaller.jar"  1>>  "%~dp0serverstart.log" 2>&1
+%MC_SYS32%\bitsadmin.exe /rawreturn /nowrap /transfer dlforgeinstaller /download /priority FOREGROUND %MC_SERVER_FORGEURL% "%~dp0tmp-forgeinstaller.jar"  1>>  "%~dp0serverstart.log" 2>&1
 
 REM Check that temp-download installer was downloaded
 IF NOT EXIST "%~dp0tmp-forgeinstaller.jar" (
@@ -756,7 +759,7 @@ GOTO CLEANUP
 :RESTARTER
 COLOR 6F
 REM Quick-check EULA before commencing full restarter logic
->nul FIND /I "eula=true" "%~dp0eula.txt" || (
+>nul %MC_SYS32%\FIND.EXE /I "eula=true" "%~dp0eula.txt" || (
 	TITLE ERROR: EULA.TXT Must be updated before %MC_SERVER_PACKNAME% server can start
 	CLS
 	ECHO.
@@ -895,7 +898,7 @@ SET MC_SERVER_CRASH_YYYYMMDD=
 SET MC_SERVER_CRASH_HHMMSS=
 
 REM Reset bitsadmin in case things got hung or errored
-bitsadmin /reset 1>>  "%~dp0serverstart.log" 2>&1
+%MC_SYS32%\bitsadmin.exe /reset 1>>  "%~dp0serverstart.log" 2>&1
 
 COLOR
 
