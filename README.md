@@ -87,20 +87,11 @@ Formatting is very important for it to load correctly:
 ______________________________
 **BASIC**  
 These basic settings are recommended for general use for any modpack:
-   ```java
-   -server -d64 -Xms1G -XX:+ExplicitGCInvokesConcurrent -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses -XX:+UseConcMarkSweepGC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:UseSSE=3
-   ```    
+   ```-d64 -server -XX:+AggressiveOpts -XX:+UseConcMarkSweepGC -XX:+UnlockExperimentalVMOptions -XX:+UseParNewGC -XX:+ExplicitGCInvokesConcurrent -XX:MaxGCPauseMillis=20 -XX:GCPauseIntervalMillis=50 -XX:+UseFastAccessorMethods -XX:+OptimizeStringConcat -XX:NewSize=84m -XX:+UseAdaptiveGCBoundary -XX:NewRatio=3 -Dfml.queryResult=confirm -Dfml.readTimeout=90 -Dfml.debugNetworkHandshake=true -Dfml.badPacketCounter=10;
+   ```   
 
 
 <br>
-
-
-______________________________
-**HIGH RAM**  
-If you have 10G or more RAM allocated to the Minecraft server, then these settings should make better use of the "extra" RAM: 
-   ```java
-   -server -d64 -Xms4G -XX:+UseG1GC -Dsun.rmi.dgc.server.gcInterval=2147483646 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50 -XX:G1HeapRegionSize=32M
-   ```  
    
 ______________________________
 There are many opinions on what's considered good or not-so-good to use for JVM args that change from person-to-person, and over time. The settings above were based on [this great discussion/explanation](https://www.reddit.com/r/feedthebeast/comments/5jhuk9/modded_mc_and_memory_usage_a_history_with_a/) by CPW, the lead dev of EnderIO and a prominent contributor to the Forge project.
