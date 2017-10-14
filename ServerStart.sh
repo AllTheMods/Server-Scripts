@@ -45,6 +45,16 @@
 #
 #
 # Make sure users aren't trying to run script via sh directly (won't work)
+
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Mac;;
+    CYGWIN*)    machine=Cygwin;;
+    MINGW*)     machine=MinGw;;
+    *)          machine="UNKNOWN:${unameOut}"
+esac
+
 if [ ! "$BASH_VERSION" ] ; then
     echo "Please do not use sh to run this script ($0). Use bash instead (or execute it directly)" 1>&2
     exit 1
@@ -197,7 +207,7 @@ read_config(){
    			if [[ ${str:0:1} != "#" ]] ; then
       			name=$(echo "$line" | cut -d '=' -f 1)
       			val=$(echo "${line}" | cut -d '=' -f 2-)
-      			eval "export ${name}='${val::-1}'"
+      			eval "export ${name}='${val%?}'"
       		fi
    		fi
 	done < settings.cfg 
@@ -236,7 +246,12 @@ echo "DEBUG: MCVER=$MCVER" >>serverstart.log 2>&1
 echo "DEBUG: FORGEVER=$FORGEVER" >>serverstart.log 2>&1
 echo "DEBUG: FORGEURL=$FORGEURL" >>serverstart.log 2>&1
 echo "DEBUG: Basic System Info: " $(uname -a) >>serverstart.log 2>&1
-echo "DEBUG: Total RAM estimate: " $(getconf -a | grep PAGES | awk 'BEGIN {total = 1} {if (NR == 1 || NR == 3) total *=$NF} END {print total / 1024 / 1024" MB"}') >>serverstart.log 2>&1
+if [ "$machine" = "Mac" ] 
+then
+  echo "DEBUG: Total RAM estimate: " $(sysctl hw.memsize | awk 'BEGIN {total = 1} {if (NR == 1 || NR == 3) total *=$NF} END {print total / 1024 / 1024" MB"}') >>serverstart.log 2>&1
+else
+  echo "DEBUG: Total RAM estimate: " $(getconf -a | grep PAGES | awk 'BEGIN {total = 1} {if (NR == 1 || NR == 3) total *=$NF} END {print total / 1024 / 1024" MB"}') >>serverstart.log 2>&1
+fi
 echo "DEBUG: Java Version info: " $(java -version) >>serverstart.log 2>&1
 echo "DEBUG: Dumping current directory listing " >>serverstart.log 2>&1
 ls -s1h >>serverstart.log 2>&1
