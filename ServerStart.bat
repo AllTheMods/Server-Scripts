@@ -174,7 +174,8 @@ for /f "delims==; tokens=1,2 eol=;" %%G in (settings.cfg) do set %%G=%%H
 
 REM Re-map imported vars
 SET MC_SERVER_MAX_RAM=%MAX_RAM%
-SET MC_SERVER_JVM_ARGS=-Xmx%MC_SERVER_MAX_RAM% %JAVA_ARGS%
+REM ----- MANUALLY adding timeout = 90 here until a proper fix is done for the settings.cfg to accept equals sign parameters
+SET MC_SERVER_JVM_ARGS=-Xmx%MC_SERVER_MAX_RAM% %JAVA_ARGS% -Dfml.readTimeout=90
 SET MC_SERVER_MAX_CRASH=%CRASH_COUNT%
 SET MC_SERVER_CRASH_TIMER=%CRASH_TIMER%
 SET MC_SERVER_RUN_FROM_BAD_FOLDER=%RUN_FROM_BAD_FOLDER%
