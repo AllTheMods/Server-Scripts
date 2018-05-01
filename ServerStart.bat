@@ -664,7 +664,7 @@ REM 	)
 REM )
 
 REM More complex wannabe-regex (aka magic)
-FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('%MC_SYS32%\FINDSTR.EXE /ir "http:\/\/files.*%MC_SERVER_FORGEVER%.*installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G & GOTO FETCHHTML1
+FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('%MC_SYS32%\FINDSTR.EXE /ir "https://files.minecraftforge.net/maven/net/minecraftforge/forge/%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%/forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G & GOTO FETCHHTML1
 
 :FETCHHTML1
 IF "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
