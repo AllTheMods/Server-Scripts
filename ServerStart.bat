@@ -716,19 +716,21 @@ REM TODO: CHECKS TO VALIDATE SUCCESSFUL INSTALL
 
 REM Create default server.properties and eula.txt files
 IF NOT EXIST "%~dp0server.properties" (
-	ECHO Could not find server.properties, creating initial copy... 1>>  "%~dp0logs\serverstart.log" 2>&1
-	ECHO INFO: server.properties not found... populating default 1>>  "%~dp0logs\serverstart.log" 2>&1
-	ECHO view-distance=8 1>> "%~dp0server.properties"  2> "%~dp0logs\serverstart.log"
-	ECHO allow-flight=true 1>> "%~dp0server.properties"  2> "%~dp0logs\serverstart.log"
-	ECHO level-type=BIOMESOP 1>> "%~dp0server.properties"  2> "%~dp0logs\serverstart.log"
-	ECHO snooper-enabled=false 1>> "%~dp0server.properties"  2> "%~dp0logs\serverstart.log"
-	ECHO max-tick-time=90000 1>> "%~dp0server.properties"  2> "%~dp0logs\serverstart.log"
-	ECHO motd=%MC_SERVER_PACKNAME% 1>> "%~dp0server.properties"  2> "%~dp0logs\serverstart.log"
+	ECHO Could not find server.properties, creating initial copy...
+	ECHO INFO: server.properties not found... populating default
+		(
+			ECHO view-distance=8
+			ECHO allow-flight=true
+			ECHO level-type=BIOMESOP
+			ECHO snooper-enabled=false
+			ECHO max-tick-time=90000
+			ECHO motd=%MC_SERVER_PACKNAME%
+		) >"%~dp0server.properties"
 	)
 IF NOT EXIST "%~dp0eula.txt" (
-	ECHO Could not find eula.txt, creating initial copy... 1>>  "%~dp0logs\serverstart.log" 2>&1
-	ECHO INFO: eula.txt not found... populating default 1>>  "%~dp0logs\serverstart.log" 2>&1
-	ECHO eula=false 1>> "%~dp0eula.txt"  2> "%~dp0logs\serverstart.log"
+	ECHO Could not find eula.txt, creating initial copy...
+	ECHO INFO: eula.txt not found... populating default
+	ECHO eula=false>>"%~dp0eula.txt"
 	)
 
 REM File cleanup
