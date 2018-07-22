@@ -284,7 +284,7 @@ ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  "%~dp0logs\serverstart.log"
 ECHO DEBUG: MC_SERVER_HIGH_PRIORITY=%MC_SERVER_HIGH_PRIORITY% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_PACKNAME=%MC_SERVER_PACKNAME% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_SPONGEURL=%MC_SERVER_SPONGEURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
-ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
+REM ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  "%~dp0logs\serverstart.log" 2>&1
@@ -503,28 +503,28 @@ IF %MC_SERVER_SPONGE% EQU 1 (
 		GOTO DOWNLOADSPONGE
 	)
 	REM Check for spongeforge bootstrapper
-	IF NOT EXIST "%~dp0*sponge*bootstrap*.jar" (
-		ECHO SpongeBootstrap loader not found...
-		ECHO INFO: SpongeForge Bootstrap loader not found 1>>  "%~dp0logs\serverstart.log" 2>&1
-		GOTO DOWNLOADSPONGE
-	)	
+REM	IF NOT EXIST "%~dp0*sponge*bootstrap*.jar" (
+REM		ECHO SpongeBootstrap loader not found...
+REM		ECHO INFO: SpongeForge Bootstrap loader not found 1>>  "%~dp0logs\serverstart.log" 2>&1
+REM		GOTO DOWNLOADSPONGE
+REM	)	
 )
 
 REM set absolute paths for binary JARs
 (FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%*universal*.jar^" /B /O:-D`) DO SET "MC_SERVER_FORGE_JAR=%%x" & GOTO CHECKFILES1) 1>> "%~dp0logs\serverstart.log" 2>&1
 
 :CHECKFILES1
-(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*sponge*bootstrap*.jar^" /B /O:-D`) DO SET "MC_SERVER_SPONGE_BOOT=%%x" & GOTO CHECKFILES2) 1>> "%~dp0logs\serverstart.log" 2>&1
+(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%*universal*.jar^" /B /O:-D`) DO SET "MC_SERVER_SPONGE_BOOT=%%x" & GOTO CHECKFILES2) 1>> "%~dp0logs\serverstart.log" 2>&1
 
 :CHECKFILES2
 REM Delete duplicate binary JARs
-ECHO DEBUG: MC_SERVER_SPONGE_BOOT=%MC_SERVER_SPONGE_BOOT% 1>> "%~dp0logs\serverstart.log" 2>&1
+rem ECHO DEBUG: MC_SERVER_SPONGE_BOOT=%MC_SERVER_SPONGE_BOOT% 1>> "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_FORGE_JAR=%MC_SERVER_FORGE_JAR% 1>> "%~dp0logs\serverstart.log" 2>&1
-ATTRIB +R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Sponge Jar present to read-only 1>> "%~dp0logs\serverstart.log" 2>&1
+rem ATTRIB +R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Sponge Jar present to read-only 1>> "%~dp0logs\serverstart.log" 2>&1
 ATTRIB +R "%MC_SERVER_FORGE_JAR%"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Forge Jar present to read-only 1>> "%~dp0logs\serverstart.log" 2>&1
 DEL "%~dp0*forge*universal*.jar" /A:-R  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Sponge Jars present to delete 1>> "%~dp0logs\serverstart.log" 2>&1
-DEL "%~dp0*sponge*bootstrap*.jar" /A:-R  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Forge Jars present to delete 1>> "%~dp0logs\serverstart.log" 2>&1
-ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Sponge Jar present to UN-read-only 1>> "%~dp0logs\serverstart.log" 2>&1
+REM DEL "%~dp0*sponge*bootstrap*.jar" /A:-R  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Forge Jars present to delete 1>> "%~dp0logs\serverstart.log" 2>&1
+rem ATTRIB -R "%MC_SERVER_SPONGE_BOOT%"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Sponge Jar present to UN-read-only 1>> "%~dp0logs\serverstart.log" 2>&1
 ATTRIB -R "%MC_SERVER_FORGE_JAR%"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No Forge Jar present to UN-read-only 1>> "%~dp0logs\serverstart.log" 2>&1
 
 :STARTSERVER
@@ -796,7 +796,7 @@ ECHO SPONGE has been enabled in settings.cfg but necessary files were not found.
 ECHO.
 ECHO To use Sponge:
 ECHO    1) "MODS" folder must have a SpongeForge JAR matching Forge %MC_SERVER_FORGESHORT%
-ECHO    2) SpongeBootstrap JAR must be present in same folder as Forge "universal"
+REM ECHO    2) SpongeBootstrap JAR must be present in same folder as Forge "universal"
 ECHO.
 ECHO **** PLEASE NOTE ****
 ECHO YOU MAY NOT RECIEVE SUPPORT from modpack devs if you use Sponge
@@ -943,7 +943,7 @@ ECHO DEBUG: MC_SERVER_HIGH_PRIORITY=%MC_SERVER_HIGH_PRIORITY% 1>>  "%~dp0logs\se
 ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_PACKNAME=%MC_SERVER_PACKNAME% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_SPONGEURL=%MC_SERVER_SPONGEURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
-ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
+REM ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_TMP_FLAG=%MC_SERVER_TMP_FLAG% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_COUNTER=%MC_SERVER_CRASH_COUNTER% 1>>  "%~dp0logs\serverstart.log" 2>&1
@@ -971,7 +971,7 @@ SET MC_SERVER_SPONGE=
 SET MC_SERVER_HIGH_PRIORITY=
 SET MC_SERVER_PACKNAME=
 SET MC_SERVER_SPONGEURL=
-SET MC_SERVER_SPONGEBOOTSTRAPURL=
+REM SET MC_SERVER_SPONGEBOOTSTRAPURL=
 SET MC_SERVER_ERROR_REASON=
 SET MC_SERVER_TMP_FLAG=
 SET MC_SERVER_CRASH_COUNTER=
