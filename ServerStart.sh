@@ -4,7 +4,7 @@
 #### Linux Version
 ####
 #### Created by: Dijkstra
-#### Mascot: Ordinator
+#### Mascot: Ordinator 
 ####
 #### Originally created for use in "All The Mods" modpacks
 #### NO OFFICIAL AFFILIATION WITH MOJANG OR FORGE
