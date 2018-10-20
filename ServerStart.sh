@@ -73,7 +73,7 @@ install_server(){
 			echo "Skipping download. Using existing installer.jar"
 		fi
 	else
-		if [ "${FORGEURL}" = "DISABLE" ]; then
+		if [ "${FORGEURL}" = DISABLE ]; then
 			export URL="http://files.minecraftforge.net/maven/net/minecraftforge/forge/${MCVER}-${FORGEVER}/forge-${MCVER}-${FORGEVER}-installer.jar"
 		else
 			export URL="${FORGEURL}"
@@ -159,7 +159,7 @@ check_dir(){
 
 # routine for ping inet connectivity
 check_connection(){
-	if [ ${IGNORE_OFFLINE} -eq 1 ]; then
+	if [ ${IGNORE_OFFLINE} = 1 ]; then
 		echo "WARN: Internet connectivity checking is disabled" >>serverstart.log 2>&1
 		echo "Skipping internet connectivity check"
 	else
