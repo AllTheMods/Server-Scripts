@@ -4,7 +4,6 @@
 #### Linux Version
 ####
 #### Created by: Dijkstra
-#### Edited By: Jasperfirecai2
 #### Mascot: Ordinator
 ####
 #### Originally created for use in "All The Mods" modpacks
@@ -20,9 +19,6 @@
 #### You might need to chmod +x before executing
 ####
 #### IF THERE ARE ANY ISSUES
-#### report directly to jasperfirecai2 first
-#### don't annoy the ATM team for something
-#### that i might have f'd up!
 #### Please make a report on the AllTheMods github:
 #### https://github.com/whatthedrunk/allthemods/issues
 #### with the contents of [serverstart.log] and [installer.log]
