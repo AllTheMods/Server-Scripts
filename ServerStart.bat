@@ -260,7 +260,6 @@ ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO    Minecraft-Forge Server install/launcher script
 ECHO    (Created by the "All The Mods" modpack team)
-ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO.
 ECHO This script will launch a Minecraft Forge Modded server
@@ -726,7 +725,7 @@ IF NOT EXIST "%~dp0server.properties" (
 		(
 			ECHO view-distance=8
 			ECHO allow-flight=true
-			ECHO level-type=default
+			ECHO level-type=BIOMESOP
 			ECHO snooper-enabled=false
 			ECHO max-tick-time=90000
 			ECHO motd=%MC_SERVER_PACKNAME%
