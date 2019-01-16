@@ -2,6 +2,8 @@
 ::::
 :::: Minecraft-Forge Server install/launcher script
 :::: Created by the "All The Mods" pack team
+:::: 
+:::: Edited by Jasperfirecai2 to include a JAVA_PATH setting;
 ::::
 :::: This script will setup and start the minecraft server
 :::: *** THIS FILE NOT INTENDED TO BE EDITED, USE "settings.cfg" INSTEAD ***
@@ -202,6 +204,7 @@ IF %MC_SERVER_TMP_FLAG% LSS 1 (SET MC_SERVER_TMP_FLAG=1)
 REM Set some placeholder defaults (failsafe if settings.cfg is old version or corrupt somehow
 SET MC_SERVER_MAX_RAM=5G
 SET MC_SERVER_JVM_ARGS=-Xmx%MC_SERVER_MAX_RAM%
+SET MC_SERVER_JAVA_PATH=Java
 SET MC_SERVER_MAX_CRASH=5
 SET MC_SERVER_CRASH_TIMER=600
 SET MC_SERVER_RUN_FROM_BAD_FOLDER=0
@@ -217,6 +220,7 @@ SET MC_SERVER_PACKNAME=PLACEHOLDER
 REM Re-map imported vars (from settings.cfg) into script-standard variables
 SET MC_SERVER_MAX_RAM=%MAX_RAM%
 SET MC_SERVER_JVM_ARGS=-Xmx%MC_SERVER_MAX_RAM% -Xms%MC_SERVER_TMP_FLAG%%MC_SERVER_MAX_RAM:~-1% %JAVA_ARGS%
+SET MC_SERVER_JAVA_PATH=%JAVA_PATH%
 SET MC_SERVER_MAX_CRASH=%CRASH_COUNT%
 SET MC_SERVER_CRASH_TIMER=%CRASH_TIMER%
 SET MC_SERVER_RUN_FROM_BAD_FOLDER=%RUN_FROM_BAD_FOLDER%
@@ -233,6 +237,7 @@ REM Cleanup imported vars after being remapped
 SET MAX_RAM=
 SET FORGE_JAR=
 SET JAVA_ARGS=
+SET JAVA_PATH=
 SET CRASH_COUNT=
 SET CRASH_TIMER=
 SET RUN_FROM_BAD_FOLDER=
@@ -257,6 +262,13 @@ ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO    Minecraft-Forge Server install/launcher script
 ECHO    (Created by the "All The Mods" modpack team)
+ECHO.
+ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
+ECHO.
+ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
+ECHO	 This script was edited by jasperfirecai2
+ECHO		Bring up issues with him first!
+ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO.
 ECHO This script will launch a Minecraft Forge Modded server
@@ -272,6 +284,7 @@ ECHO DEBUG: MC_SERVER_MAX_RAM=%MC_SERVER_MAX_RAM% 1>>  "%~dp0logs\serverstart.lo
 ECHO DEBUG: MC_SERVER_FORGE_JAR=%MC_SERVER_FORGE_JAR% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_SPONGE_BOOT=%MC_SERVER_SPONGE_BOOT% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_JVM_ARGS=%MC_SERVER_JVM_ARGS% 1>>  "%~dp0logs\serverstart.log" 2>&1
+ECHO DEBUG: MC_SERVER_JAVA_PATH=%MC_SERVER_JAVA_PATH% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_MAX_CRASH=%MC_SERVER_MAX_CRASH% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_CRASH_TIMER=%MC_SERVER_CRASH_TIMER% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_IGNORE_OFFLINE=%MC_SERVER_IGNORE_OFFLINE% 1>>  "%~dp0logs\serverstart.log" 2>&1
@@ -298,10 +311,10 @@ REM reg query "HKLM\System\CurrentControlSet\Control\Session Manager\Environment
 
 :CHECKJAVA
 ECHO INFO: Checking java installation...
-ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  "%~dp0logs\serverstart.log" 2>&1
-java -d64 -version || GOTO JAVAERROR 1>>  "%~dp0logs\serverstart.log" 2>&1
+ECHO DEBUG: JAVA version output (%MC_SERVER_JAVA_PATH% -d64 -version): 1>>  "%~dp0logs\serverstart.log" 2>&1
+%MC_SERVER_JAVA_PATH% -d64 -version || GOTO JAVAERROR 1>>  "%~dp0logs\serverstart.log" 2>&1
 
-java -d64 -version 2>&1 | %MC_SYS32%\FIND.EXE "1.8"  1>>  "%~dp0logs\serverstart.log" 2>&1
+%MC_SERVER_JAVA_PATH% -d64 -version 2>&1 | %MC_SYS32%\FIND.EXE "1.8"  1>>  "%~dp0logs\serverstart.log" 2>&1
 IF %ERRORLEVEL% EQU 0 (
 	ECHO INFO: Found 64-bit Java 1.8 1>> "%~dp0logs\serverstart.log" 2>&1
 	ECHO ...64-bit Java 1.8 found! 1>> "%~dp0logs\serverstart.log" 2>&1
@@ -539,24 +552,24 @@ COLOR 07
 
 REM Batch will wait here indefinitely while MC server is running
 IF %MC_SERVER_SPONGE% EQU 1 (
-	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ]
-	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ] 1>> "%~dp0logs\serverstart.log" 2>&1
+	ECHO DEBUG: Attempting to execute [ %MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ]
+	ECHO DEBUG: Attempting to execute [ %MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui ] 1>> "%~dp0logs\serverstart.log" 2>&1
 	COLOR 
 	IF %MC_SERVER_HIGH_PRIORITY% EQU 1 (
-		START /B /I /WAIT /HIGH java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui
+		START /B /I /WAIT /HIGH %MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui
 	) ELSE (
-		java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui
+		%MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_SPONGE_BOOT%" nogui
 	)
 ) ELSE (
 	ECHO DEBUG: Disabling any spongeforge jar in \mods\ because USE_SPONGE is disabled in settings.cfg 1>> "%~dp0logs\serverstart.log" 2>&1
 	(FOR /f "tokens=* delims=*" %%x in ('dir "%~dp0mods\*spongeforge*.jar" /B /O:-D') DO MOVE /Y "%~dp0mods\%%x" "%%x.disabled") 1>> "%~dp0logs\serverstart.log" 2>&1
-	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ]
-	ECHO DEBUG: Attempting to execute [ java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ] 1>> "%~dp0logs\serverstart.log" 2>&1
+	ECHO DEBUG: Attempting to execute [ %MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ]
+	ECHO DEBUG: Attempting to execute [ %MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui ] 1>> "%~dp0logs\serverstart.log" 2>&1
 	COLOR 
 	IF %MC_SERVER_HIGH_PRIORITY% EQU 1 (
-		START /B /I /WAIT /HIGH java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
+		START /B /I /WAIT /HIGH %MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
 	) ELSE (
-		java %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
+		%MC_SERVER_JAVA_PATH% %MC_SERVER_JVM_ARGS% -jar "%~dp0%MC_SERVER_FORGE_JAR%" nogui
 	)
 )
 
@@ -710,7 +723,7 @@ ECHO Download complete.
 ECHO.
 ECHO Installing Forge now, please wait...
 ECHO INFO: Starting Forge install now, details below: 1>>  "%~dp0logs\serverstart.log" 2>&1
-java -jar "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" --installServer 1>>  "%~dp0logs\serverstart.log" 2>&1
+%MC_SERVER_JAVA_PATH% -jar "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" --installServer 1>>  "%~dp0logs\serverstart.log" 2>&1
 
 REM TODO: CHECKS TO VALIDATE SUCCESSFUL INSTALL
 
@@ -721,7 +734,7 @@ IF NOT EXIST "%~dp0server.properties" (
 		(
 			ECHO view-distance=8
 			ECHO allow-flight=true
-			ECHO level-type=BIOMESOP
+			ECHO level-type=default
 			ECHO snooper-enabled=false
 			ECHO max-tick-time=90000
 			ECHO motd=%MC_SERVER_PACKNAME%
@@ -951,8 +964,8 @@ ECHO DEBUG: MC_SERVER_CRASH_YYYYMMDD=%MC_SERVER_CRASH_YYYYMMDD% 1>>  "%~dp0logs\
 ECHO DEBUG: MC_SERVER_CRASH_HHMMSS=%MC_SERVER_CRASH_HHMMSS% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: Current directory file listing: 1>>  "%~dp0logs\serverstart.log" 2>&1
 DIR 1>>  "%~dp0logs\serverstart.log" 2>&1
-ECHO DEBUG: JAVA version output (java -d64 -version): 1>>  "%~dp0logs\serverstart.log" 2>&1
-java -d64 -version 1>>  "%~dp0logs\serverstart.log" 2>&1
+ECHO DEBUG: JAVA version output (%MC_SERVER_JAVA_PATH% -d64 -version): 1>>  "%~dp0logs\serverstart.log" 2>&1
+%MC_SERVER_JAVA_PATH% -d64 -version 1>>  "%~dp0logs\serverstart.log" 2>&1
 
 REM Clear variables -- probably not necessary since we SETLOCAL but doesn't hurt either
 SET MC_SERVER_MAX_RAM=

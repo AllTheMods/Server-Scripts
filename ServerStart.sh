@@ -4,7 +4,8 @@
 #### Linux Version
 ####
 #### Created by: Dijkstra
-#### Mascot: Ordinator 
+#### Edited By: Jasperfirecai2
+#### Mascot: Ordinator
 ####
 #### Originally created for use in "All The Mods" modpacks
 #### NO OFFICIAL AFFILIATION WITH MOJANG OR FORGE
@@ -19,6 +20,9 @@
 #### You might need to chmod +x before executing
 ####
 #### IF THERE ARE ANY ISSUES
+#### report directly to jasperfirecai2 first
+#### don't annoy the ATM team for something
+#### that i might have f'd up!
 #### Please make a report on the AllTheMods github:
 #### https://github.com/whatthedrunk/allthemods/issues
 #### with the contents of [serverstart.log] and [installer.log]
@@ -111,7 +115,7 @@ install_server(){
 		mv -f ./OpenComputersMod*lua* ./DELETEME >>serverstart.log 2>&1
 		echo "Installing Forge Server, please wait..."
 		echo "INFO: Installing Forge Server" >>serverstart.log 2>&1
-		java -jar installer.jar --installServer >>serverstart.log 2>&1
+		${JAVA_PATH} -jar installer.jar --installServer >>serverstart.log 2>&1
 		echo "Deleting Forge installer (no longer needed)"
 		echo "INFO: Deleting installer.jar" >>serverstart.log 2>&1
 		rm -rf installer.jar  >>serverstart.log 2>&1
@@ -124,7 +128,7 @@ start_server() {
 	echo ""
 	echo "Starting server"
 	echo "INFO: Starting Server at " $(date -u +%Y-%m-%d_%H:%M:%S) >>serverstart.log 2>&1
-	java -Xmx${MAX_RAM} ${JAVA_ARGS} -jar forge-${MCVER}-${FORGEVER}-universal.jar nogui
+	${JAVA_PATH} -Xmx${MAX_RAM} ${JAVA_ARGS} -jar forge-${MCVER}-${FORGEVER}-universal.jar nogui
 }
 
 # routine for basic directory checks
@@ -252,7 +256,7 @@ then
 else
   echo "DEBUG: Total RAM estimate: " $(getconf -a | grep PAGES | awk 'BEGIN {total = 1} {if (NR == 1 || NR == 3) total *=$NF} END {print total / 1024 / 1024" MB"}') >>serverstart.log 2>&1
 fi
-echo "DEBUG: Java Version info: " $(java -version) >>serverstart.log 2>&1
+echo "DEBUG: Java Version info: " $(${JAVA_PATH} -version) >>serverstart.log 2>&1
 echo "DEBUG: Dumping current directory listing " >>serverstart.log 2>&1
 ls -s1h >>serverstart.log 2>&1
 
