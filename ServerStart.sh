@@ -239,6 +239,7 @@ echo "INFO: Starting script at" $(date -u +%Y-%m-%d_%H:%M:%S) >serverstart.log 2
 echo "DEBUG: Dumping starting variables: " >>serverstart.log 2>&1
 echo "DEBUG: MAX_RAM=$MAX_RAM" >>serverstart.log 2>&1
 echo "DEBUG: JAVA_ARGS=$JAVA_ARGS" >>serverstart.log 2>&1
+echo "DEBUG: JAVA_PATH=$JAVA_PATH" >>serverstart.log 2>&1
 echo "DEBUG: CRASH_COUNT=$CRASH_COUNT" >>serverstart.log 2>&1
 echo "DEBUG: RUN_FROM_BAD_FOLDER=$RUN_FROM_BAD_FOLDER" >>serverstart.log 2>&1
 echo "DEBUG: IGNORE_OFFLINE=$IGNORE_OFFLINE" >>serverstart.log 2>&1
