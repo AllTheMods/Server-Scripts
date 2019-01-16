@@ -2,8 +2,6 @@
 ::::
 :::: Minecraft-Forge Server install/launcher script
 :::: Created by the "All The Mods" pack team
-:::: 
-:::: Edited by Jasperfirecai2 to include a JAVA_PATH setting;
 ::::
 :::: This script will setup and start the minecraft server
 :::: *** THIS FILE NOT INTENDED TO BE EDITED, USE "settings.cfg" INSTEAD ***
@@ -262,12 +260,6 @@ ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO    Minecraft-Forge Server install/launcher script
 ECHO    (Created by the "All The Mods" modpack team)
-ECHO.
-ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
-ECHO.
-ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
-ECHO	 This script was edited by jasperfirecai2
-ECHO		Bring up issues with him first!
 ECHO.
 ECHO ::::::::::::::::::::::::::::::::::::::::::::::::::::
 ECHO.
