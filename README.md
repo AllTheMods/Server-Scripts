@@ -7,7 +7,7 @@
    GitHub: https://github.com/AllTheMods/Server-Scripts          
    AllTheMods Discord: https://discord.gg/FdFDVWb      
 
-   Originally created for use in "All The Mods" modpacks, but is **free for anyone to use, modify or distribute** provided the conditions of the custom license (detailed below) are met.
+   Originally created for use in "All The Mods" modpacks (this edit for the SUCC modpack), but is **free for anyone to use, modify or distribute** provided the conditions of the custom license (detailed below) are met.
 
 <br>
 
@@ -63,6 +63,7 @@ Formatting is very important for it to load correctly:
 | ----------|----------------------------| :------------:|
 | **MAX_RAM**      | How much max RAM to allow the JVM to allocate to the server  | `5G` |
 | **JAVA_ARGS**      | The defaults provided should be best for most people, but can be edited if desired | *See Below* |
+| **JAVA_PATH**| The default searches for a java installation in the normal location. if this doesn't work, supply the full path to your 64-bit java install | `C:\Program Files\Java\jre1.8.0_131\bin\java.exe` |
 | **CRASH_COUNT** | The max number of consecutive crashes that each occur within so many seconds of each other. If max is reaches, the script will exit. This is to stop spamming restarts of a server with a critical issue. | `8` |
 | **CRASH_TIMER** | The number of seconds to consider a crash within to be "consecutive" | `600` |
 | **RUN_FROM_BAD_FOLDER** | The scripts will not run from "temp" folders or "system" folders. If you want to force allow this, change the value to `1` | `0` | 
