@@ -178,7 +178,12 @@ ECHO. 1>>  "%~dp0logs\serverstart.log" 2>&1
 >nul %MC_SYS32%\FIND.EXE /I "FORGEURL=" "%~dp0settings.cfg" || (
 	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:FORGEURL
 	GOTO ERROR
-	)		
+	)	
+	
+>nul %MC_SYS32%\FIND.EXE /I "DEFAULT_WORLD_TYPE=" "%~dp0settings.cfg" || (
+	SET MC_SERVER_ERROR_REASON=Settings.cfg_Error:DEFAULT_WORLD_TYPE
+	GOTO ERROR
+	)	
 
 REM  LOAD Settings from config
 ECHO INFO: Loading variables from settings.cfg 1>>  "%~dp0logs\serverstart.log" 2>&1 
@@ -213,6 +218,7 @@ SET MC_SERVER_FORGEURL=DISABLE
 SET MC_SERVER_SPONGE=0
 SET MC_SERVER_HIGH_PRIORITY=0
 SET MC_SERVER_PACKNAME=PLACEHOLDER
+SET MC_SERVER_WORLDTYPE=BIOMESOP
 
 REM Re-map imported vars (from settings.cfg) into script-standard variables
 SET MC_SERVER_MAX_RAM=%MAX_RAM%
@@ -228,6 +234,7 @@ SET MC_SERVER_FORGEURL=%FORGEURL%
 SET MC_SERVER_SPONGE=%USE_SPONGE%
 SET MC_SERVER_HIGH_PRIORITY=%HIGH_CPU_PRIORITY%
 SET MC_SERVER_PACKNAME=%MODPACK_NAME%
+SET MC_SERVER_WORLDTYPE=%DEFAULT_WORLD_TYPE%
 
 REM Cleanup imported vars after being remapped
 SET MAX_RAM=
@@ -283,6 +290,7 @@ ECHO DEBUG: MC_SERVER_FORGEURL=%MC_SERVER_FORGEURL% 1>>  "%~dp0logs\serverstart.
 ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_HIGH_PRIORITY=%MC_SERVER_HIGH_PRIORITY% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_PACKNAME=%MC_SERVER_PACKNAME% 1>>  "%~dp0logs\serverstart.log" 2>&1
+ECHO DEBUG: MC_SERVER_WORLDTYPE=%MC_SERVER_WORLDTYPE% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_SPONGEURL=%MC_SERVER_SPONGEURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
 REM ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  "%~dp0logs\serverstart.log" 2>&1
@@ -707,12 +715,6 @@ MOVE /Y "%~dp0tmp-forgeinstaller.jar" "forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEV
 ECHO Download complete.
 
 :RUNINSTALLER
-ECHO.
-ECHO Installing Forge now, please wait...
-ECHO INFO: Starting Forge install now, details below: 1>>  "%~dp0logs\serverstart.log" 2>&1
-java -jar "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" --installServer 1>>  "%~dp0logs\serverstart.log" 2>&1
-
-REM TODO: CHECKS TO VALIDATE SUCCESSFUL INSTALL
 
 REM Create default server.properties and eula.txt files
 IF NOT EXIST "%~dp0server.properties" (
@@ -721,7 +723,7 @@ IF NOT EXIST "%~dp0server.properties" (
 		(
 			ECHO view-distance=8
 			ECHO allow-flight=true
-			ECHO level-type=BIOMESOP
+			ECHO level-type=%MC_SERVER_WORLDTYPE%
 			ECHO snooper-enabled=false
 			ECHO max-tick-time=90000
 			ECHO motd=%MC_SERVER_PACKNAME%
@@ -732,6 +734,13 @@ IF NOT EXIST "%~dp0eula.txt" (
 	ECHO INFO: eula.txt not found... populating default
 	ECHO eula=false>>"%~dp0eula.txt"
 	)
+	
+ECHO.
+ECHO Installing Forge now, please wait...
+ECHO INFO: Starting Forge install now, details below: 1>>  "%~dp0logs\serverstart.log" 2>&1
+java -jar "%~dp0forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" --installServer 1>>  "%~dp0logs\serverstart.log" 2>&1
+
+REM TODO: CHECKS TO VALIDATE SUCCESSFUL INSTALL
 
 REM File cleanup
 DEL /F /Q "%~dp0tmp-forgeinstaller.jar"  1>>  "%~dp0logs\serverstart.log" 2>&1
@@ -747,7 +756,7 @@ ECHO  %MC_SERVER_PACKNAME% Server Files are now ready!
 ECHO ========================================================
 ECHO INFO: Download/Install complete... 1>>  "%~dp0logs\serverstart.log" 2>&1
 >nul TIMEOUT 1
-ECHO Download/Install of Forge and Minecraft binaries was sucessfull.
+ECHO Download/Install of Forge and Minecraft binaries was sucessful.
 ECHO.
 >nul TIMEOUT 3
 IF /i "%1"=="install" (
@@ -942,6 +951,7 @@ ECHO DEBUG: MC_SERVER_FORGEURL=%MC_SERVER_FORGEURL% 1>>  "%~dp0logs\serverstart.
 ECHO DEBUG: MC_SERVER_HIGH_PRIORITY=%MC_SERVER_HIGH_PRIORITY% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_SPONGE=%MC_SERVER_SPONGE% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_PACKNAME=%MC_SERVER_PACKNAME% 1>>  "%~dp0logs\serverstart.log" 2>&1
+ECHO DEBUG: MC_SERVER_WORLDTYPE=%MC_SERVER_WORLDTYPE% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_SPONGEURL=%MC_SERVER_SPONGEURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
 REM ECHO DEBUG: MC_SERVER_SPONGEBOOTSTRAPURL=%MC_SERVER_SPONGEBOOTSTRAPURL% 1>>  "%~dp0logs\serverstart.log" 2>&1
 ECHO DEBUG: MC_SERVER_ERROR_REASON=%MC_SERVER_ERROR_REASON% 1>>  "%~dp0logs\serverstart.log" 2>&1
@@ -970,6 +980,7 @@ SET MC_SERVER_FORGEURL=
 SET MC_SERVER_SPONGE=
 SET MC_SERVER_HIGH_PRIORITY=
 SET MC_SERVER_PACKNAME=
+SET MC_SERVER_WORLDTYPE=
 SET MC_SERVER_SPONGEURL=
 REM SET MC_SERVER_SPONGEBOOTSTRAPURL=
 SET MC_SERVER_ERROR_REASON=
