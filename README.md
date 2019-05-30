@@ -44,19 +44,18 @@
 Windows: **`ServerStart.Bat`** *(Run/Double-Click)*  
 Linux: **`bash ServerStart.sh`** *(must be bash, not shell/sh)*
 
-**OPTIONAL** There is an "install only" option that will setup all required files but NOT automatically run the server. Simply pass the option "install" after the script from a prompt. NOTE: Linux sh support for this option is still WIP (TODO):
+**OPTIONAL** There is an "install only" option that will setup all required files but NOT automatically run the server. Simply pass the option "install" after the script from a prompt.
 ```
 ServerStart.Bat install
 ```
-
+There is also options for the ServerStart.sh file that will skip the user's input if wanted using "-a" or "--auto". Also, for install only for Serverstart.sh, by passing in "-i" or "--install" 
 ________________   
 
 ### settings.cfg   
 Formatting is very important for it to load correctly: 
-* `SETTING=VALUE;`
+* `SETTING=VALUE`
 * No spaces around the equal sign
 * One setting per line
-* Semicolon immediately following value (no spaces)
 
 
 | Setting   | Description                | Example Value | 
@@ -71,6 +70,7 @@ Formatting is very important for it to load correctly:
 | **USE_SPONGE** | Mostly unsupported and experimental. If set to `1` script will attempt to launch SpongeBootstrap but only if the bootstrap is present and SpongeForge is in Mods folder. This will not download/setup the required files either, merely launch the pack using them. **Sponge can cause undocumented errors and conflicts and therefore it's use is rarely supported by modpack developers. USE AT YOUR OWN RISK and only if you know what you're doing** | `0` |
 | **HIGH_CPU_PRIORITY** | This will attempt to start the Java process in a higher priority than "normal." This shouldn't have a major negative impact on the host computer but if it's causing conflicts or taking too much CPU time you can try disabling. *Linux implementation is still WIP (TODO)* | `1` |
 | **MODPACK_NAME** | Pack name to add flavor/description to script as it's running. Quotes are not needed. Can contain spaces. Technically can be very long, but will work better if short/concise (i.e. "Illumination" would be *much* better to use than "All The Mods Presents: Illumination") | `All The Mods` |
+| **DEFAULT_WORLD_TYPE** | Allows for changing the type of world used.  | `BIOMESOP` |
 | **MCVER** | Target Minecraft version. Usually set by pack dev before distributing and not intended to be changed by end-users. Must be complete/exact and matching the version on Forge's website (i.e. `1.10` is not the same as `1.10.2`) | `1.10.2` |
 | **FORGEVER** | Target Forge version. Usually set by pack dev before distributing and not intended to be changed by end-users. Requires the full version and exactly matching Forge's website. (i.e. `2254` will not work, but `12.18.3.2254` will) | `12.18.3.2281` | 
 | **FORGEURL** | Direct url to a Forge "installer" jar. Mostly for debugging purposes, but if a URL is specified, the Forge installer of this link will be downloaded regardless of the previous settings.\*   | `DISABLE` |
