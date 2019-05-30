@@ -76,7 +76,7 @@ install_server(){
         echo "No installer found will try to download it"
         
         if [ "${MC_SERVER_FORGEURL}" = "DISABLE" ]; then
-            export MC_SERVER_URL="http://files.minecraftforge.net/maven/net/minecraftforge/forge/${MC_SERVER_MCVER}-${MC_SERVER_FORGEVER}/forge-${MC_SERVER_MCVER}-${MC_SERVER_FORGEVER}-installer.jar"
+            export MC_SERVER_URL="https://files.minecraftforge.net/maven/net/minecraftforge/forge/${MC_SERVER_MCVER}-${MC_SERVER_FORGEVER}/forge-${MC_SERVER_MCVER}-${MC_SERVER_FORGEVER}-installer.jar"
         else
             export MC_SERVER_URL="${MC_SERVER_FORGEURL}"
         fi
@@ -435,7 +435,7 @@ while $run ; do
         a=0
     else
         now=$((SECONDS))
-        diff=$($now-$last_crash)
+        diff=$now-$last_crash
         if [[ $diff -gt $MC_SERVER_CRASH_TIMER ]]; then
             a=1
         else
@@ -444,8 +444,8 @@ while $run ; do
         last_crash=$((SECONDS))
     fi
     if [[ "$a" == "$MC_SERVER_CRASH_COUNT" ]]; then
-        echo "The server has crashed to many times"
-        echo "ERROR: Server has failed too start too many times in a row." >>logs/serverstart.log
+        echo "The server has crashed too many times"
+        echo "ERROR: Server has failed to start too many times in a row." >>logs/serverstart.log
         exit 1
     fi
     
