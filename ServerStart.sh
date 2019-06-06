@@ -173,7 +173,7 @@ export MC_SERVER_INSTALL_ONLY=0
 #Loading setting.cfg
 if [ -f ./settings.cfg ]; then
     #Read the config file line by line
-    while IFS='' read -r line || [[ -n "$line" ]]; do
+    while IFS=$'\n\r' read -r line || [[ -n "$line" ]]; do
         #Fliters out comments and empty lines
         if [[ ${line:0:1} != ';' ]] && [[ $line = *[!\ ]* ]]; then
             var="MC_SERVER_"$(echo "$line" | cut -d '=' -f 1)
