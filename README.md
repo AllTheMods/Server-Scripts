@@ -44,11 +44,16 @@
 Windows: **`ServerStart.Bat`** *(Run/Double-Click)*  
 Linux: **`bash ServerStart.sh`** *(must be bash, not shell/sh)*
 
-**OPTIONAL** There is an "install only" option that will setup all required files but NOT automatically run the server. Simply pass the option "install" after the script from a prompt.
-```
-ServerStart.Bat install
-```
-There is also options for the ServerStart.sh file that will skip the user's input if wanted using "-a" or "--auto". Also, for install only for Serverstart.sh, by passing in "-i" or "--install" 
+#### Arguments
+| Setting   | Description                |
+| ----------|----------------------------|
+| -i, --install, install | Runs only the install portion of the script. The server will not automatically start after.|
+| -a, --auto | Skips user input stages and uses default values instead |
+
+#### If you're running your server on a remote system, the following command can be used to keep it running even when you close your terminal:
+ ```
+ nohup ./ServerStart.sh -a &>/dev/null &
+ ```
 ________________   
 
 ### settings.cfg   
