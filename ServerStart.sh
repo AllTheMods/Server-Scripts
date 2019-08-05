@@ -186,6 +186,20 @@ else
     echo "WARN: Failed to find settings.cfg" >>logs/serverstart.log
 fi
 
+if [ -f ./pack.cfg ]; then
+    #Read the pack config file line by line
+    while IFS=$'\n\r' read -r line || [[ -n "$line" ]]; do
+        #Fliters out comments and empty lines
+        if [[ ${line:0:1} != ';' ]] && [[ $line = *[!\ ]* ]]; then
+            var="MC_SERVER_"$(echo "$line" | cut -d '=' -f 1)
+            value=$(echo "$line" | cut -d '=' -f 2-)
+            export "$var"="$value"
+        fi
+    done < ./pack.cfg
+else
+    echo "WARN: Failed to find pack.cfg" >>logs/serverstart.log
+fi
+
 while :; do
     case $1 in
         -a|--auto) export MC_SERVER_AUTO_RESPOND=1
