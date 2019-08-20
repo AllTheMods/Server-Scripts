@@ -470,9 +470,11 @@ ECHO INFO: Checking for forge/minecraft binaries... 1>>  "%~dp0logs\serverstart.
 
 REM Check if forge is already installed
 IF NOT EXIST "%~dp0*forge*%MC_SERVER_FORGEVER%*universal*.jar" (
-	ECHO FORGE %MC_SERVER_FORGEVER% binary not found, re-installing...
-	ECHO INFO: FORGE %MC_SERVER_FORGEVER% not found, re-installing... 1>>  "%~dp0logs\serverstart.log" 2>&1
-	GOTO INSTALLSTART
+	IF NOT EXIST "%~dp0*forge*%MC_SERVER_FORGEVER%.jar" (
+		ECHO FORGE %MC_SERVER_FORGEVER% binary not found, re-installing...
+		ECHO INFO: FORGE %MC_SERVER_FORGEVER% not found, re-installing... 1>>  "%~dp0logs\serverstart.log" 2>&1
+		GOTO INSTALLSTART
+	)
 )
 
 REM Check if Minecraft JAR is already downloaded
@@ -519,10 +521,13 @@ REM	)
 )
 
 REM set absolute paths for binary JARs
-(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%*universal*.jar^" /B /O:-D`) DO SET "MC_SERVER_FORGE_JAR=%%x" & GOTO CHECKFILES1) 1>> "%~dp0logs\serverstart.log" 2>&1
-
+IF EXIST "%~dp0*forge*%MC_SERVER_FORGEVER%.jar" (
+	(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%.jar^" /B /O:-D`) DO SET "MC_SERVER_FORGE_JAR=%%x" & GOTO CHECKFILES1) 1>> "%~dp0logs\serverstart.log" 2>&1
+) ELSE (
+	(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%*universal*.jar^" /B /O:-D`) DO SET "MC_SERVER_FORGE_JAR=%%x" & GOTO CHECKFILES1) 1>> "%~dp0logs\serverstart.log" 2>&1
+)
 :CHECKFILES1
-(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%*universal*.jar^" /B /O:-D`) DO SET "MC_SERVER_SPONGE_BOOT=%%x" & GOTO CHECKFILES2) 1>> "%~dp0logs\serverstart.log" 2>&1
+(FOR /f "usebackq tokens=* delims=*" %%x in (`dir ^"*forge*%MC_SERVER_FORGEVER%.jar^" /B /O:-D`) DO SET "MC_SERVER_SPONGE_BOOT=%%x" & GOTO CHECKFILES2) 1>> "%~dp0logs\serverstart.log" 2>&1
 
 :CHECKFILES2
 REM Delete duplicate binary JARs
@@ -655,36 +660,38 @@ IF NOT EXIST "%~dp0forge-%MC_SERVER_MCVER%.html" (
 )
 
 REM Simple search for matching text to make sure we got the correct webpage/html (and not a 404, for example)
-REM ECHO DEBUG: Checking simple pattern match for forge ver to validate HTML... 1>>  "%~dp0logs\serverstart.log" 2>&1
-REM FIND /I "%MC_SERVER_FORGEVER%" forge-%MC_SERVER_MCVER%.html 1>> "%~dp0logs\serverstart.log" 2>&1 || (
-REM 	IF %MC_SERVER_TMP_FLAG% LEQ 0 (
-REM 		ECHO Something wrong with Forge download part 1 of 2
-REM 		ECHO Something wrong with Forge download part 1 of 2 1>>  "%~dp0logs\serverstart.log" 2>&1
+ECHO DEBUG: Checking simple pattern match for forge ver to validate HTML... 1>>  "%~dp0logs\serverstart.log" 2>&1
+FIND /I "/maven/net/minecraftforge/forge/%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%/forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" forge-%MC_SERVER_MCVER%.html 1>> "%~dp0logs\serverstart.log" 2>&1 || (
+	IF %MC_SERVER_TMP_FLAG% LEQ 0 (
+		ECHO Something wrong with Forge download part 1 of 2
+		ECHO Something wrong with Forge download part 1 of 2 1>>  "%~dp0logs\serverstart.log" 2>&1
+		SET MC_SERVER_TMP_FLAG=1
+		DEL /F /Q "%~dp0*forge-index.html"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No forge-index to delete 1>>  "%~dp0logs\serverstart.log" 2>&1
+		GOTO FETCHHTML
+	) ELSE (
+		ECHO HTML Download failed a second time... stopping. 
+		ECHO ERROR: HTML Download failed a second time... stopping. 1>>  "%~dp0logs\serverstart.log" 2>&1
+		SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
+		GOTO ERROR
+	)
+)
+SET MC_SERVER_FORGEURL="https://files.minecraftforge.net/maven/net/minecraftforge/forge/%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%/forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar"
+
+
+REM More complex wannabe-regex (aka magic)
+REM FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('%MC_SYS32%\FINDSTR.EXE /i "/maven/net/minecraftforge/forge/%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%/forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G && GOTO FETCHHTML1
+REM 
+REM :FETCHHTML1
+REM IF "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
+REM 	IF "%MC_SERVER_TMP_FLAG%"=="0" (
+REM 		ECHO Something went wrong, trying again...
 REM 		SET MC_SERVER_TMP_FLAG=1
-REM 		DEL /F /Q "%~dp0*forge-index.html"  1>> "%~dp0logs\serverstart.log" 2>&1 || ECHO INFO: No forge-index to delete 1>>  "%~dp0logs\serverstart.log" 2>&1
 REM 		GOTO FETCHHTML
 REM 	) ELSE (
-REM 		ECHO HTML Download failed a second time... stopping. 
-REM 		ECHO ERROR: HTML Download failed a second time... stopping. 1>>  "%~dp0logs\serverstart.log" 2>&1
 REM 		SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
 REM 		GOTO ERROR
 REM 	)
 REM )
-
-REM More complex wannabe-regex (aka magic)
-FOR /f tokens^=^5^ delims^=^=^<^>^" %%G in ('%MC_SYS32%\FINDSTR.EXE /ir "https://files.minecraftforge.net/maven/net/minecraftforge/forge/%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%/forge-%MC_SERVER_MCVER%-%MC_SERVER_FORGEVER%-installer.jar" "%~dp0forge-%MC_SERVER_MCVER%.html"') DO SET MC_SERVER_FORGEURL=%%G & GOTO FETCHHTML1
-
-:FETCHHTML1
-IF "%MC_SERVER_FORGEURL%"=="%MC_SERVER_FORGEURL:installer.jar=%" (
-	IF "%MC_SERVER_TMP_FLAG%"=="0" (
-		ECHO Something went wrong, trying again...
-		SET MC_SERVER_TMP_FLAG=1
-		GOTO FETCHHTML
-	) ELSE (
-		SET MC_SERVER_ERROR_REASON=ForgeDownloadURLNotFound
-		GOTO ERROR
-	)
-) 
 
 ECHO Downloading FORGE (step 2 of 2). This can take several minutes, please be patient...
 SET MC_SERVER_TMP_FLAG=0
