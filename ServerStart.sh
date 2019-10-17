@@ -378,13 +378,18 @@ while $run ; do
         echo "Required files not found, need to install Forge"
         install_server
     fi
-    forge=$(ls forge*"$MC_SERVER_MCVER"*"$MC_SERVER_FORGEVER"*universal.jar 2>>logs/serverstart.log)
-    if [[ $? != 0 ]] ; then
+    forge=("$(ls forge*"$MC_SERVER_MCVER"*"$MC_SERVER_FORGEVER"*.jar)") 2>>logs/serverstart.log 2>&1
+    for file in ${forge[0]}; do
+        if [[ "$file" != *"installer"* ]]; then
+            export MC_SERVER_FORGE_JAR="${file}"
+            break
+        fi
+    done
+    if [[ -z $MC_SERVER_FORGE_JAR ]] ; then
         echo "WARN: no forge jar for MCVER: $MC_SERVER_MCVER and FORGEVER: $MC_SERVER_FORGEVER found"  >>logs/serverstart.log
         echo "Required files not found, need to install Forge"
         install_server
     else
-        export MC_SERVER_FORGE_JAR="${forge[0]}"
         echo "DEBUG: Found forge jar: $MC_SERVER_FORGE_JAR" >>logs/serverstart.log
     fi
     
