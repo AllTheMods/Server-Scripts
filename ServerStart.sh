@@ -81,7 +81,7 @@ install_server(){
             export MC_SERVER_URL="${MC_SERVER_FORGEURL}"
         fi
         
-        command - v curl >> /dev/null 2>&1
+        command -v curl >> /dev/null 2>&1
         if [[ $? == 0 ]]; then
             echo "DEBUG: (curl) Downloading ${MC_SERVER_URL}" >>logs/serverstart.log 2>&1
             curl -OJL "${MC_SERVER_URL}" >>logs/serverstart.log 2>&1
